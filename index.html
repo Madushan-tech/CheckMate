@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckMate - Task Management</title>
+    <meta name="description" content="CheckMate - Smart task management app for planning, tracking, and achieving your goals">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CheckMate">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✓%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
+                 alt="User profile picture" 
+                 class="profile-pic">
+            
+            <div class="search-container">
+                <input type="text" 
+                       class="search-input" 
+                       placeholder="Find Goals"
+                       aria-label="Search tasks and goals">
+            </div>
+            
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23FBBF24'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23000'/%3E%3Ctext x='50' y='65' text-anchor='middle' fill='%23FBBF24' font-size='40' font-weight='bold'%3E✓%3C/text%3E%3C/svg%3E" 
+                 alt="CheckMate logo" 
+                 class="app-logo">
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Content will be dynamically loaded here -->
+        </main>
+
+        <!-- Floating Action Button -->
+        <button class="fab" aria-label="Add new task">
+            <span class="material-icons">add</span>
+        </button>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-page="home" aria-label="Home">
+                <span class="material-icons">home</span>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item" data-page="plan" aria-label="Plan">
+                <span class="material-icons">list_alt</span>
+                <span>Plan</span>
+            </a>
+            <a href="#" class="nav-item" data-page="report" aria-label="Report">
+                <span class="material-icons">bar_chart</span>
+                <span>Report</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- New Task Modal -->
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-handle">
+                <div class="modal-handle-bar"></div>
+            </div>
+            
+            <div class="modal-header">
+                <h1 class="modal-title">New Task</h1>
+            </div>
+            
+            <div class="modal-body">
+                <form id="newTaskForm">
+                    <div class="form-group">
+                        <input type="text" 
+                               name="taskName" 
+                               class="form-input" 
+                               placeholder="Task name"
+                               required
+                               aria-label="Task name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea name="description" 
+                                  class="form-textarea" 
+                                  placeholder="Short description"
+                                  aria-label="Task description"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Date and time</label>
+                        <div class="datetime-input-group">
+                            <input type="datetime-local" 
+                                   name="datetime" 
+                                   class="datetime-input" 
+                                   aria-label="Select date and time">
+                            <span class="material-icons datetime-icon">calendar_today</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Options</label>
+                        
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">Set as alarm</label>
+                            <input type="checkbox" name="alarm" class="checkbox">
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">Multi-step</label>
+                            <input type="checkbox" name="multiStep" class="checkbox">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        Add Task
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
+
