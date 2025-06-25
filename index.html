@@ -27,31 +27,37 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
-                 alt="User profile picture" 
-                 class="profile-pic">
-            
-            <div class="search-container">
-                <input type="text" 
-                       class="search-input" 
-                       placeholder="Find Goals"
-                       aria-label="Search tasks and goals">
-            </div>
-            
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23FBBF24'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23000'/%3E%3Ctext x='50' y='65' text-anchor='middle' fill='%23FBBF24' font-size='40' font-weight='bold'%3E✓%3C/text%3E%3C/svg%3E" 
-                 alt="CheckMate logo" 
-                 class="app-logo">
+            <h1 class="app-title">CheckMate</h1>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
+            <div class="task-countdown-container">
+                <h2 id="ongoingTaskName">[Ongoing Task Name]</h2>
+                <p id="remainingTime">00:00:00</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-link active" onclick="openTab(event, 'all')">All items</button>
+                <button class="tab-link" onclick="openTab(event, 'nextDay')">Next day items</button>
+                <button class="tab-link" onclick="openTab(event, 'incomplete')">Incomplete items</button>
+                <button class="tab-link" onclick="openTab(event, 'cancelled')">Cancel items</button>
+            </div>
+
+            <div id="all" class="tab-content" style="display:block;">
+                <!-- Content for All items -->
+            </div>
+            <div id="nextDay" class="tab-content">
+                <!-- Content for Next day items -->
+            </div>
+            <div id="incomplete" class="tab-content">
+                <!-- Content for Incomplete items -->
+            </div>
+            <div id="cancelled" class="tab-content">
+                <!-- Content for Cancel items -->
+            </div>
             <!-- Content will be dynamically loaded here -->
         </main>
-
-        <!-- Floating Action Button -->
-        <button class="fab" aria-label="Add new task">
-            <span class="material-icons">add</span>
-        </button>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
@@ -66,6 +72,10 @@
             <a href="#" class="nav-item" data-page="report" aria-label="Report">
                 <span class="material-icons">bar_chart</span>
                 <span>Report</span>
+            </a>
+            <a href="#" class="nav-item" data-page="profile" aria-label="Profile">
+                <span class="material-icons">person</span>
+                <span>Profile</span>
             </a>
         </nav>
     </div>

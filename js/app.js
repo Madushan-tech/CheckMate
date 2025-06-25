@@ -11,6 +11,33 @@ class CheckMateApp {
     this.setupDateFilter();
     this.setupSearch();
     this.loadCurrentPage();
+    this.setupTabs(); // Call a new method to set up tab listeners
+  }
+
+  setupTabs() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    tabLinks.forEach(link => {
+      link.addEventListener('click', (event) => {
+        // Prevent default if it's an anchor, though we are using buttons
+        // event.preventDefault();
+        const tabName = event.currentTarget.getAttribute('onclick').match(/'([^']+)'/)[1];
+        this.openTab(event, tabName);
+      });
+    });
+  }
+
+  openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
   }
 
   setupNavigation() {
@@ -25,14 +52,6 @@ class CheckMateApp {
         }
       }
     });
-
-    // Handle FAB click
-    const fab = document.querySelector('.fab');
-    if (fab) {
-      fab.addEventListener('click', () => {
-        this.openNewTaskModal();
-      });
-    }
   }
 
   setupModal() {
@@ -105,7 +124,17 @@ class CheckMateApp {
       case 'report':
         this.loadReportPage(mainContent);
         break;
+      case 'profile':
+        this.loadProfilePage(mainContent); // Added case for profile
+        break;
     }
+  }
+
+  loadProfilePage(container) { // Added function for profile page
+    container.innerHTML = `
+      <h1 class="page-title">Profile</h1>
+      <p>Profile content will go here.</p>
+    `;
   }
 
   loadHomePage(container) {
@@ -159,10 +188,10 @@ class CheckMateApp {
 
       <section class="tasks-section">
         <div class="section-header">
-          <h2 class="section-title">Ongoing Tasks</h2>
+          <h2 class="section-title">Upcoming Tasks</h2>
         </div>
         <div class="tasks-list">
-          ${this.generateTaskCards(this.getOngoingTasks())}
+          ${this.generateTaskCards(this.getUpcomingTasks())}
         </div>
       </section>
     `;
@@ -328,7 +357,7 @@ class CheckMateApp {
     `).join('');
   }
 
-  getOngoingTasks() {
+  getUpcomingTasks() { // Renamed function
     return [
       {
         title: 'Smith Script Write',
