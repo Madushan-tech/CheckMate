@@ -98,7 +98,7 @@ body {
   align-items: center;
   padding: 0.75rem 1rem; /* Similar to header padding */
   margin-top: 0; /* Removed space above it, will be handled by sticky top value */
-  margin-bottom: 0.5rem; /* Reduced space below it */
+  margin-bottom: 0.25rem; /* Further reduced space below it */
   background-color: var(--secondary-bg);
   border-radius: 0.5rem; /* Optional: rounded corners */
   color: var(--text-primary);
@@ -169,12 +169,11 @@ body {
 }
 
 /* Apply padding-top to main-content only when it's directly preceded by a task-countdown-container */
-/* Countdown height is approx 2.67rem. New margin-bottom is 0.5rem.
-   So, padding-top = 2.67rem + 0.5rem = 3.17rem. Round to 3.2rem or 3.25rem.
-   Let's use 3.2rem for a slightly tighter feel.
+/* Countdown height is approx 2.67rem. New margin-bottom is 0.25rem.
+   So, padding-top = 2.67rem + 0.25rem = 2.92rem. Round to 2.9rem.
 */
 .task-countdown-container + .main-content {
-  padding-top: 3.2rem; /* Original: 3.75rem */
+  padding-top: 2.9rem; /* Original: 3.2rem */
 }
 
 /* Tabs Styling */

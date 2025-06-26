@@ -537,7 +537,7 @@ class CheckMateApp {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
     }
-    container.innerHTML = `
+    mainContentContainer.innerHTML = `
       <div class="date-filter">
         <button class="date-btn">Tomorrow</button>
         <button class="date-btn active">Today</button>
@@ -689,7 +689,6 @@ class CheckMateApp {
           <h3 class="task-title">${task.title}</h3>
           <div class="task-icons">
             <span class="material-icons ${task.iconColor}">${task.icon}</span>
-            <span class="material-icons ${task.starred ? 'text-yellow' : 'text-gray'}">${task.starred ? 'star' : 'star_border'}</span>
           </div>
         </div>
         <div class="task-meta">
@@ -713,9 +712,8 @@ class CheckMateApp {
         title: 'Smith Script Write',
         time: '4:00 P.M. - 6:00 P.M.',
         project: 'Project 003',
-        icon: 'engineering',
-        iconColor: 'text-yellow',
-        starred: true
+        icon: 'videocam', // Changed from 'engineering'
+        iconColor: 'text-green' // Changed from 'text-yellow'
       },
       {
         id: 'task2', // Added ID
@@ -724,7 +722,6 @@ class CheckMateApp {
         project: 'Project 001',
         icon: 'code',
         iconColor: 'text-gray',
-        starred: true,
         type: 'multi-step', // Added type
         progress: 0.5, // Example progress (50%)
         steps: [ // Added steps
@@ -740,8 +737,7 @@ class CheckMateApp {
         time: '9:00 P.M. - 10:00 P.M.',
         project: 'Project 006',
         icon: 'play_circle_filled',
-        iconColor: 'text-green',
-        starred: false
+        iconColor: 'text-green'
       }
     ];
   }
