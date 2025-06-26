@@ -27,8 +27,16 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <div class="header-item"></div> <!-- Spacer for left side -->
-            <h1 class="app-title">CheckMate</h1>
+            <div class="header-item">
+                <img src="images/CheckMate_logo.png" alt="CheckMate Logo" class="header-logo">
+            </div>
+            <h1 class="app-title">
+                <div class="task-display">
+                    <span id="task-line-1"></span>
+                    <span id="task-line-2"></span>
+                </div>
+                <div id="countdown-timer" class="countdown-timer"></div>
+            </h1>
             <div class="header-item header-item-right">
                 <span class="material-icons notification-icon">notifications</span>
             </div>

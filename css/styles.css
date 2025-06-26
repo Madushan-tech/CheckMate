@@ -82,6 +82,46 @@ body {
   line-height: 1; /* Adjust line height for tighter fit */
 }
 
+.header-logo {
+  height: 30px; /* Adjust as needed */
+  width: auto;
+  margin-right: 10px; /* Add some space between logo and task display */
+}
+
+.app-title {
+  flex: 2; /* Title takes more space */
+  text-align: center;
+  color: #ffffff;
+  font-size: 1em; /* Adjusted font size to accommodate more content */
+  font-weight: bold;
+  margin: 0;
+  padding: 0.25em 0;
+  line-height: 1.2; /* Adjusted line height for two lines of task */
+  display: flex; /* Use flex to align task and timer */
+  justify-content: center; /* Center the content within app-title */
+  align-items: center; /* Vertically align items */
+}
+
+.task-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align text to the left within its container */
+  text-align: left;
+  margin-right: 10px; /* Space between task and timer */
+}
+
+#task-line-1, #task-line-2 {
+  display: block; /* Each span on its own line */
+  white-space: nowrap; /* Prevent wrapping within a line, wrapping is handled by word split */
+}
+
+.countdown-timer {
+  font-size: 0.9em; /* Slightly smaller than task text */
+  font-weight: normal;
+  color: var(--accent-yellow); /* Use a distinct color for the timer */
+  white-space: nowrap;
+}
+
 /* Main Content */
 .main-content {
   flex: 1;
