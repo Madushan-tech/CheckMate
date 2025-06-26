@@ -12,10 +12,10 @@ class CheckMateApp {
     this.setupSearch();
     this.loadCurrentPage();
     this.setupTabs(); // Call a new method to set up tab listeners
-    this.startHeaderCountdown(); // Start the header countdown
+    this.startTaskCountdown(); // Renamed: Start the task countdown
   }
 
-  startHeaderCountdown() {
+  startTaskCountdown() {
     const taskNameElement1 = document.getElementById('task-line-1');
     const taskNameElement2 = document.getElementById('task-line-2');
     const countdownElement = document.getElementById('countdown-timer');
@@ -205,10 +205,19 @@ class CheckMateApp {
   }
 
   loadHomePage(container) {
-    container.innerHTML = `
-      <div class="timestamp">
-        ${this.getCurrentDateTime()}
+    // Container for task display and countdown, replacing the old timestamp
+    const taskCountdownHTML = `
+      <div class="task-countdown-container">
+        <div class="task-display">
+            <span id="task-line-1"></span>
+            <span id="task-line-2"></span>
+        </div>
+        <div id="countdown-timer" class="countdown-timer"></div>
       </div>
+    `;
+
+    container.innerHTML = `
+      ${taskCountdownHTML}
 
       <section class="stats-section">
         <div class="section-header">
