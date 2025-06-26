@@ -689,6 +689,7 @@ class CheckMateApp {
           <h3 class="task-title">${task.title}</h3>
           <div class="task-icons">
             <span class="material-icons ${task.iconColor}">${task.icon}</span>
+            ${task.secondaryIcon ? `<span class="material-icons ${task.secondaryIcon.color}">${task.secondaryIcon.name}</span>` : ''}
           </div>
         </div>
         <div class="task-meta">
@@ -713,7 +714,8 @@ class CheckMateApp {
         time: '4:00 P.M. - 6:00 P.M.',
         project: 'Project 003',
         icon: 'videocam', // Changed from 'engineering'
-        iconColor: 'text-green' // Changed from 'text-yellow'
+        iconColor: 'text-green', // Changed from 'text-yellow'
+        secondaryIcon: { name: 'skip_next', color: 'text-yellow' }
       },
       {
         id: 'task2', // Added ID
