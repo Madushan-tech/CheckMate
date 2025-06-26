@@ -2,6 +2,7 @@
 class CheckMateApp {
   constructor() {
     this.currentPage = 'home';
+    this.countdownInterval = null; // Initialize countdownInterval property
     this.init();
   }
 
@@ -10,12 +11,17 @@ class CheckMateApp {
     this.setupModal();
     this.setupDateFilter();
     this.setupSearch();
-    this.loadCurrentPage();
-    this.setupTabs(); // Call a new method to set up tab listeners
-    this.startTaskCountdown(); // Renamed: Start the task countdown
+    this.loadCurrentPage(); // This will call loadHomePage if on home, which now calls initializeAndDisplayTaskCountdown
+    this.setupTabs();
+    // Removed this.startTaskCountdown(); - it's now handled by loadHomePage
   }
 
-  startTaskCountdown() {
+  initializeAndDisplayTaskCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+
     const taskNameElement1 = document.getElementById('task-line-1');
     const taskNameElement2 = document.getElementById('task-line-2');
     const countdownElement = document.getElementById('countdown-timer');
@@ -74,7 +80,7 @@ class CheckMateApp {
     };
 
     updateCountdown(); // Initial call
-    const countdownInterval = setInterval(updateCountdown, 1000); // Update every second
+    this.countdownInterval = setInterval(updateCountdown, 1000); // Store interval ID
   }
 
   setupTabs() {
@@ -211,6 +217,10 @@ class CheckMateApp {
   }
 
   loadProfilePage(container) { // Added function for profile page
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
     container.innerHTML = `
       <h1 class="page-title">Profile</h1>
       <p>Profile content will go here.</p>
@@ -286,9 +296,14 @@ class CheckMateApp {
     `;
     // Note: The tab content area defined in index.html will remain, but will be empty
     // as tab content population is reverted.
+    this.initializeAndDisplayTaskCountdown(); // Initialize countdown for home page
   }
 
   loadPlanPage(container) {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
     container.innerHTML = `
       <div class="date-filter">
         <button class="date-btn">Tomorrow</button>
@@ -379,6 +394,10 @@ class CheckMateApp {
   }
 
   loadReportPage(container) {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
     container.innerHTML = `
       <div class="timestamp">
         ${this.getCurrentDateTime()}

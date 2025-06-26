@@ -97,7 +97,7 @@ body {
   justify-content: space-between; /* Puts task on left, timer on right */
   align-items: center;
   padding: 0.75rem 1rem; /* Similar to header padding */
-  margin-top: 1rem; /* Space above it, below the header */
+  margin-top: 0.5rem; /* Reduced space above it */
   margin-bottom: 1rem; /* Space below it */
   background-color: var(--secondary-bg); /* Optional: give it a background */
   border-radius: 0.5rem; /* Optional: rounded corners */
