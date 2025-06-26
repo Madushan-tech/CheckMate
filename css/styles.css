@@ -694,6 +694,19 @@ body {
   gap: 0.5rem; /* Space between buttons */
 }
 
+.step-item.cancelled label {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.step-item.cancelled .step-toggle-arrow {
+  display: none; /* Hide arrow for cancelled step */
+}
+
+.step-item.cancelled .step-actions {
+  display: none !important; /* Hide actions for cancelled step */
+}
+
 .btn-step-action {
   padding: 0.3rem 0.6rem;
   font-size: 0.75rem;

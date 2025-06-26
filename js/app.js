@@ -55,8 +55,17 @@ class CheckMateApp {
         }
         // Handle toggle arrow click
         else if (target.classList.contains('step-toggle-arrow') && target.dataset.stepId) {
-          const stepId = target.dataset.stepId;
-          this.toggleStepActions(stepId, target);
+          const stepLi = target.closest('.step-item');
+          const stepId = stepLi.dataset.stepId;
+          const taskId = stepLi.dataset.taskId;
+          this.toggleStepActions(stepId, taskId, target);
+        }
+        // Handle sub-action button click
+        else if (target.classList.contains('btn-step-action') && target.dataset.stepId) {
+            const stepId = target.dataset.stepId;
+            const taskId = target.dataset.taskId; // Get from button
+            const action = target.dataset.action;
+            this.handleStepSubAction(action, stepId, taskId);
         }
       });
     }
@@ -71,53 +80,83 @@ class CheckMateApp {
       if (step) {
         step.completed = isChecked;
         console.log(`Task ${taskId}, Step ${stepId} completion changed to ${isChecked}`);
-        // TODO: Recalculate and update overall task progress on the main card
-        // TODO: Update progress bar on main card
+
+        // Recalculate progress
+        const completedSteps = task.steps.filter(s => s.completed).length;
+        const totalSteps = task.steps.length;
+        task.progress = totalSteps > 0 ? (completedSteps / totalSteps) : 0;
+
+        console.log(`Task ${taskId} new progress: ${task.progress}`);
+        this.updateTaskCardUI(taskId); // Update the UI
       }
     }
   }
 
-  toggleStepActions(stepId, arrowElement) {
-    const stepActionsDiv = document.querySelector(`.step-actions[data-step-id="${stepId}"]`);
+  updateTaskCardUI(taskId) {
+    const task = this.getUpcomingTasks().find(t => t.id === taskId);
+    if (!task || task.type !== 'multi-step') return;
+
+    const taskCardElement = document.querySelector(`.task-card[data-task-card-id="${taskId}"]`);
+    if (taskCardElement) {
+      const progressBarFill = taskCardElement.querySelector('.progress-bar-fill');
+      if (progressBarFill) {
+        progressBarFill.style.width = (task.progress * 100) + '%';
+      }
+    }
+  }
+
+  toggleStepActions(stepId, taskId, arrowElement) { // Added taskId
+    const stepActionsDiv = document.querySelector(`.step-actions[data-step-id="${stepId}"][data-task-id="${taskId}"]`);
     if (stepActionsDiv) {
       const isExpanded = stepActionsDiv.style.display !== 'none';
       stepActionsDiv.style.display = isExpanded ? 'none' : 'block';
       arrowElement.classList.toggle('expanded', !isExpanded);
       arrowElement.textContent = isExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_up';
 
-      // Populate actions if expanding and not already populated (or always repopulate)
-      if (!isExpanded && !stepActionsDiv.hasChildNodes()) { // Simple check: only populate once
-        this.populateStepActions(stepActionsDiv, stepId);
+      // Populate actions if expanding and not already populated
+      if (!isExpanded && !stepActionsDiv.hasChildNodes()) {
+        this.populateStepActions(stepActionsDiv, stepId, taskId); // Pass taskId
       }
     }
   }
 
-  populateStepActions(actionsContainer, stepId) {
-    // This is where buttons for "Cancel", "Forward", "Date/Time Update" will be added
-    // Placeholder for now - actual implementation in next step
+  populateStepActions(actionsContainer, stepId, taskId) { // Added taskId
     actionsContainer.innerHTML = `
-      <button class="btn-step-action" data-action="cancel" data-step-id="${stepId}">Cancel Step</button>
-      <button class="btn-step-action" data-action="forward" data-step-id="${stepId}">Forward Step</button>
-      <button class="btn-step-action" data-action="update-time" data-step-id="${stepId}">Update Time</button>
+      <button class="btn-step-action" data-action="cancel" data-step-id="${stepId}" data-task-id="${taskId}">Cancel Step</button>
+      <button class="btn-step-action" data-action="forward" data-step-id="${stepId}" data-task-id="${taskId}">Forward Step</button>
+      <button class="btn-step-action" data-action="update-time" data-step-id="${stepId}" data-task-id="${taskId}">Update Time</button>
     `;
-
-    actionsContainer.querySelectorAll('.btn-step-action').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const action = e.target.dataset.action;
-        const stepId = e.target.dataset.stepId;
-        this.handleStepSubAction(action, stepId);
-      });
-    });
+    // Event listeners are now handled by delegation in setupStepsModalInteraction
   }
 
-  handleStepSubAction(action, stepId) {
-    // Placeholder for actual functionality
-    console.log(`Sub-action clicked: ${action} for step ${stepId}`);
-    // In a real app, you would implement logic for:
-    // - 'cancel': Mark step as cancelled, or remove it, etc.
-    // - 'forward': Reschedule this step for the next day.
-    // - 'update-time': Open a date/time picker to change the step's due date/time.
-    alert(`Action: ${action}\nStep ID: ${stepId}\n(Placeholder - check console)`);
+  handleStepSubAction(action, stepId, taskId) { // Added taskId
+    console.log(`Sub-action clicked: ${action} for step ${stepId} in task ${taskId}`);
+    const task = this.getUpcomingTasks().find(t => t.id === taskId);
+    const step = task?.steps.find(s => s.id === stepId);
+
+    if (!step) {
+        console.error("Step not found for action:", action, stepId, taskId);
+        return;
+    }
+
+    if (action === 'cancel') {
+      step.completed = false; // Uncheck if cancelled
+      step.cancelled = true; // Mark as cancelled
+      // Visually update the step item
+      const stepLiElement = document.querySelector(`.step-item[data-step-id="${stepId}"]`);
+      if (stepLiElement) {
+        stepLiElement.classList.add('cancelled');
+        const checkbox = stepLiElement.querySelector(`input[type="checkbox"]`);
+        if (checkbox) checkbox.checked = false;
+        // We might also want to disable the checkbox or hide actions for cancelled step
+      }
+      this.updateTaskStepCompletion(taskId, stepId, false); // This will also trigger progress update
+      alert(`Step "${step.title}" cancelled.`);
+    } else if (action === 'forward') {
+      alert(`Forward step "${step.title}" (placeholder).`);
+    } else if (action === 'update-time') {
+      alert(`Update time for step "${step.title}" (placeholder).`);
+    }
   }
 
   openStepsModal(taskId) {
@@ -139,11 +178,13 @@ class CheckMateApp {
       task.steps.forEach(step => {
         const li = document.createElement('li');
         li.className = 'step-item'; // Will add styles later
+        li.dataset.stepId = step.id; // Add stepId to li for easier access
+        li.dataset.taskId = taskId;   // Add taskId to li for easier access
         li.innerHTML = `
           <input type="checkbox" id="step-${step.id}" ${step.completed ? 'checked' : ''} data-step-id="${step.id}" data-task-id="${taskId}">
           <label for="step-${step.id}">${step.title}</label>
           <span class="material-icons step-toggle-arrow" data-step-id="${step.id}">keyboard_arrow_down</span>
-          <div class="step-actions" style="display:none;" data-step-id="${step.id}">
+          <div class="step-actions" style="display:none;" data-step-id="${step.id}" data-task-id="${taskId}">
             <!-- Sub-actions will be populated here -->
           </div>
         `;
@@ -613,7 +654,7 @@ class CheckMateApp {
 
   generateTaskCards(tasks) {
     return tasks.map(task => `
-      <div class="task-card fade-in">
+      <div class="task-card fade-in" data-task-card-id="${task.id}"> <!-- Added data-task-card-id -->
         <div class="task-header">
           <h3 class="task-title">${task.title}</h3>
           <div class="task-icons">
