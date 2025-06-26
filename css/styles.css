@@ -43,13 +43,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 1rem;
+  /* padding: 1.5rem 1rem; */ /* Original larger padding */
   position: sticky;
   top: 0;
-  background-color: #121416; /* Dark background like home.html */
+  background-color: var(--secondary-bg); /* Matched to bottom-nav */
   z-index: 100;
-  /* text-align: center; Removed to allow flex to center title */
-  padding: 0.75rem 1rem; /* Reduced padding for header height */
+  padding: 0.5rem 1rem; /* Further Reduced top/bottom padding */
   display: flex; /* Use flexbox for layout */
   justify-content: space-between; /* Distribute items */
   align-items: center; /* Vertically align items */
@@ -83,9 +82,9 @@ body {
 }
 
 .header-logo {
-  height: 24px; /* Adjusted to match notification icon visual size */
+  height: 45px; /* Updated to user preference */
   width: auto;
-  margin-right: 10px; /* Keeping margin for now, may not be needed if app-title is empty */
+  margin-right: 10px;
 }
 
 /* The .app-title style below is for the main header title, if any.
@@ -98,6 +97,7 @@ body {
   justify-content: space-between; /* Puts task on left, timer on right */
   align-items: center;
   padding: 0.75rem 1rem; /* Similar to header padding */
+  margin-top: 1rem; /* Space above it, below the header */
   margin-bottom: 1rem; /* Space below it */
   background-color: var(--secondary-bg); /* Optional: give it a background */
   border-radius: 0.5rem; /* Optional: rounded corners */
@@ -379,7 +379,7 @@ body {
   max-width: 480px;
   background-color: var(--secondary-bg);
   border-top: 1px solid var(--border-color);
-  padding: 0.75rem;
+  padding: 0.4rem 0.75rem; /* Reduced padding */
   display: flex;
   justify-content: space-around;
   border-top-left-radius: 16px; /* Curved top-left corner */
@@ -395,7 +395,7 @@ body {
   text-decoration: none;
   color: var(--text-secondary);
   transition: color 0.2s ease;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem; /* Reduced padding */
 }
 
 .nav-item:hover {
@@ -407,12 +407,12 @@ body {
 }
 
 .nav-item .material-icons {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.25rem; /* Reduced icon size */
+  margin-bottom: 0.15rem; /* Reduced margin */
 }
 
 .nav-item span {
-  font-size: 0.75rem;
+  font-size: 0.7rem; /* Reduced text size */
 }
 
 /* Modal Styles */

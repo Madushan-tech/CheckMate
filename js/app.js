@@ -171,7 +171,20 @@ class CheckMateApp {
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
     });
-    document.querySelector(`[data-page="${page}"]`).classList.add('active');
+    const activeNavItem = document.querySelector(`[data-page="${page}"]`);
+    if (activeNavItem) {
+      activeNavItem.classList.add('active');
+    }
+
+    // Conditional Header Display
+    const headerElement = document.querySelector('.header');
+    if (headerElement) {
+      if (page === 'home') {
+        headerElement.style.display = 'flex'; // Or remove a 'hidden' class
+      } else {
+        headerElement.style.display = 'none'; // Or add a 'hidden' class
+      }
+    }
 
     // Update page content
     this.currentPage = page;
