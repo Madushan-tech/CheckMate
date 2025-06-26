@@ -38,63 +38,11 @@ class CheckMateApp {
     }
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
-
-    // Load content for the selected tab
-    this.loadTabContent(tabName);
+    // Removed call to this.loadTabContent(tabName);
   }
 
-  loadTabContent(tabName) {
-    const tabContentElement = document.getElementById(tabName);
-    if (!tabContentElement) return;
-
-    let tasks = [];
-    switch (tabName) {
-      case 'all':
-        tasks = this.getAllItemsTasks();
-        break;
-      case 'nextDay':
-        tasks = this.getNextDayItemsTasks();
-        break;
-      case 'incomplete':
-        tasks = this.getIncompleteItemsTasks();
-        break;
-      case 'cancelled':
-        tasks = this.getCancelledItemsTasks();
-        break;
-    }
-    tabContentElement.innerHTML = this.generateTaskCards(tasks);
-  }
-
-  // Example task data functions for each tab
-  getAllItemsTasks() {
-    // Combining some tasks for "All items" view
-    return [
-      ...this.getUpcomingTasks(), // Keep existing upcoming tasks
-      { title: 'Review PR #123', time: 'Yesterday', project: 'Project X', icon: 'reviews', iconColor: 'text-gray', starred: false, type: 'normal' },
-      { title: 'Plan Q3 Roadmap', time: 'Next Week', project: 'Strategy', icon: 'event_note', iconColor: 'text-gray', starred: true, type: 'normal' }
-    ];
-  }
-
-  getNextDayItemsTasks() {
-    return [
-      { title: 'Prepare presentation slides', time: 'Tomorrow 10:00 AM', project: 'Client Meeting', icon: 'slideshow', iconColor: 'text-blue', starred: true, type: 'normal' },
-      { title: 'Follow up with John Doe', time: 'Tomorrow 2:00 PM', project: 'Sales', icon: 'call', iconColor: 'text-gray', starred: false, type: 'normal' }
-    ];
-  }
-
-  getIncompleteItemsTasks() {
-    return [
-      { title: 'Fix login bug', time: 'Overdue - 2 days', project: 'App v2.1', icon: 'bug_report', iconColor: 'text-red', starred: true, type: 'normal' },
-      { title: 'User testing feedback session', time: 'Skipped', project: 'UX Research', icon: 'feedback', iconColor: 'text-orange', starred: false, type: 'normal' }
-    ];
-  }
-
-  getCancelledItemsTasks() {
-    return [
-      { title: 'Team lunch booking', time: 'Cancelled', project: 'Team Building', icon: 'restaurant', iconColor: 'text-gray', starred: false, type: 'normal' },
-      { title: 'Send out weekly newsletter', time: 'Cancelled', project: 'Marketing', icon: 'mail', iconColor: 'text-gray', starred: false, type: 'normal' }
-    ];
-  }
+  // Removed loadTabContent and specific task-generating functions
+  // (getAllItemsTasks, getNextDayItemsTasks, getIncompleteItemsTasks, getCancelledItemsTasks)
 
   setupNavigation() {
     // Handle navigation clicks
@@ -194,38 +142,65 @@ class CheckMateApp {
   }
 
   loadHomePage(container) {
-    // The `container` is mainContent. We are no longer wiping it out and rebuilding it from scratch here.
-    // Instead, we are targeting specific elements within it that are defined in index.html.
+    container.innerHTML = `
+      <div class="timestamp">
+        ${this.getCurrentDateTime()}
+      </div>
 
-    const currentTaskDisplay = document.getElementById('currentTaskDisplay');
-    if (currentTaskDisplay) {
-      // Example data - this would ideally come from a task management system
-      // and have a running countdown.
-      const currentTask = {
-        name: "CheckMate app development",
-        startTime: "9:00 P.M.",
-        endTime: "10:30 P.M.",
-        remainingMinutes: 30
-      };
-      currentTaskDisplay.innerHTML = `
-        <span class="task-name">${currentTask.name}</span>
-        <span class="task-time">${currentTask.startTime} - ${currentTask.endTime}</span>
-        (<span class="task-remaining">remaining ${currentTask.remainingMinutes} minutes</span>)
-      `;
-    }
+      <section class="stats-section">
+        <div class="section-header">
+          <h2 class="section-title">Today Journey</h2>
+        </div>
+        <div class="card stats-card fade-in">
+          <div class="stats-icon-section">
+            <span class="material-icons stats-icon">list_alt</span>
+            <div class="stats-label">Plan</div>
+            <div class="stats-number">12</div>
+          </div>
+          <div class="stats-details">
+            <div class="stats-row">
+              <div class="stats-item text-green">
+                <span class="material-icons">check_circle</span>
+                <span>Complete</span>
+              </div>
+              <span class="stats-badge badge-green">07</span>
+            </div>
+            <div class="stats-row">
+              <div class="stats-item text-yellow">
+                <span class="material-icons">skip_next</span>
+                <span>Next Day</span>
+              </div>
+              <span class="stats-badge badge-yellow">02</span>
+            </div>
+            <div class="stats-row">
+              <div class="stats-item text-red">
+                <span class="material-icons">cancel</span>
+                <span>Incomplete</span>
+              </div>
+              <span class="stats-badge badge-red">02</span>
+            </div>
+            <div class="stats-row">
+              <div class="stats-item text-gray">
+                <span class="material-icons">delete</span>
+                <span>Cancel</span>
+              </div>
+              <span class="stats-badge badge-gray">01</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    // The old content that was here (timestamp, stats-section, tasks-section)
-    // has been removed as per the new design focusing on the current task display
-    // and tabs for task lists.
-
-    // Ensure the 'all' tab is populated by default when home page loads
-    const defaultTabButton = document.querySelector('.tab-link[onclick*="\'all\'"]');
-    if (defaultTabButton) {
-        // Simulate a click or directly call openTab
-        // To avoid issues with 'evt.currentTarget' if called directly without an event,
-        // and to ensure styling is applied, it's better to find the element and pass it.
-        this.openTab({ currentTarget: defaultTabButton }, 'all');
-    }
+      <section class="tasks-section">
+        <div class="section-header">
+          <h2 class="section-title">Upcoming Tasks</h2>
+        </div>
+        <div class="tasks-list">
+          ${this.generateTaskCards(this.getUpcomingTasks())}
+        </div>
+      </section>
+    `;
+    // Note: The tab content area defined in index.html will remain, but will be empty
+    // as tab content population is reverted.
   }
 
   loadPlanPage(container) {
@@ -384,19 +359,6 @@ class CheckMateApp {
           <span>${task.time}</span>
           <span>${task.project}</span>
         </div>
-        ${task.type === 'multi-step' ? `
-          <div class="task-progress-container">
-            <div class="task-progress-bar" style="width: ${task.progress || 0}%;"></div>
-          </div>
-          <ul class="sub-steps-list">
-            ${task.subSteps.map(step => `
-              <li class="sub-step-item ${step.completed ? 'completed' : ''}">
-                <span class="material-icons sub-step-icon">${step.completed ? 'check_box' : 'check_box_outline_blank'}</span>
-                ${step.name}
-              </li>
-            `).join('')}
-          </ul>
-        ` : ''}
       </div>
     `).join('');
   }
@@ -409,8 +371,7 @@ class CheckMateApp {
         project: 'Project 003',
         icon: 'engineering',
         iconColor: 'text-yellow',
-        starred: true,
-        type: 'normal' // Explicitly define type
+        starred: true
       },
       {
         title: 'Script App Development',
@@ -418,15 +379,8 @@ class CheckMateApp {
         project: 'Project 001',
         icon: 'code',
         iconColor: 'text-gray',
-        starred: true,
-        type: 'multi-step', // Define as multi-step
-        subSteps: [
-          { name: 'Design phase', completed: true },
-          { name: 'Development', completed: true },
-          { name: 'Testing', completed: false },
-          { name: 'Deployment', completed: false }
-        ],
-        progress: 50 // Example progress
+        starred: true
+        // Reverted: Removed type, subSteps, progress
       },
       {
         title: 'Video Editing',

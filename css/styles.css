@@ -48,11 +48,32 @@ body {
   top: 0;
   background-color: #121416; /* Dark background like home.html */
   z-index: 100;
-  text-align: center; /* Center the title */
+  /* text-align: center; Removed to allow flex to center title */
   padding: 0.75rem 1rem; /* Reduced padding for header height */
+  display: flex; /* Use flexbox for layout */
+  justify-content: space-between; /* Distribute items */
+  align-items: center; /* Vertically align items */
+}
+
+.header-item {
+  flex: 1; /* Each item takes equal space initially */
+  display: flex;
+  align-items: center;
+}
+
+.header-item-right {
+  justify-content: flex-end; /* Align icon to the right */
+}
+
+.notification-icon {
+  color: #ffffff;
+  font-size: 1.5em; /* Adjust size as needed */
+  cursor: pointer;
 }
 
 .app-title {
+  flex: 2; /* Title takes more space to help centering if needed, but text-align handles it */
+  text-align: center; /* Explicitly center the title text within its container */
   color: #ffffff; /* White text like home.html */
   font-size: 1.25em; /* Slightly reduced font size */
   font-weight: bold;
@@ -66,31 +87,6 @@ body {
   flex: 1;
   padding: 0 1rem 6rem;
   overflow-y: auto;
-}
-
-/* Current Task Display */
-.current-task-display {
-  background-color: var(--secondary-bg);
-  color: var(--text-primary);
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 0.75rem;
-  text-align: center;
-  font-size: 0.9em;
-}
-
-.current-task-display .task-name {
-  font-weight: 600;
-}
-
-.current-task-display .task-time {
-  font-size: 0.9em;
-  color: var(--text-secondary);
-}
-
-.current-task-display .task-remaining {
-  color: var(--accent-yellow);
-  font-weight: 500;
 }
 
 /* Tabs Styling */
@@ -243,56 +239,6 @@ body {
   background-color: #2D3748;
   transform: translateX(4px);
 }
-
-/* Multi-step task progress */
-.task-progress-container {
-  height: 8px;
-  background-color: var(--border-color);
-  border-radius: 4px;
-  margin-top: 0.75rem;
-  overflow: hidden;
-}
-
-.task-progress-bar {
-  height: 100%;
-  background-color: var(--accent-green);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.sub-steps-list {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 0.75rem;
-}
-
-.sub-step-item {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.25rem;
-}
-
-.sub-step-item.completed {
-  color: var(--text-primary);
-  text-decoration: line-through;
-}
-
-.sub-step-icon {
-  font-size: 1.125rem; /* 18px */
-  margin-right: 0.5rem;
-  color: var(--accent-green);
-}
-
-.sub-step-item.completed .sub-step-icon {
-  color: var(--accent-green);
-}
-
-.sub-step-item:not(.completed) .sub-step-icon {
-  color: var(--text-secondary);
-}
-
 
 .task-header {
   display: flex;
