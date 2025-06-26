@@ -98,7 +98,7 @@ body {
   align-items: center;
   padding: 0.75rem 1rem; /* Similar to header padding */
   margin-top: 0; /* Removed space above it, will be handled by sticky top value */
-  margin-bottom: 0.25rem; /* Further reduced space below it */
+  margin-bottom: 0rem; /* Minimized space below it */
   background-color: var(--secondary-bg);
   border-radius: 0.5rem; /* Optional: rounded corners */
   color: var(--text-primary);
@@ -140,6 +140,7 @@ body {
 /* Main Content */
 .main-content {
   flex: 1;
+  min-height: 0; /* Added to potentially help with flex/overflow interaction */
   /* Adjusted top padding:
      Original was 0.
      Approx height of task-countdown-container:
@@ -169,11 +170,11 @@ body {
 }
 
 /* Apply padding-top to main-content only when it's directly preceded by a task-countdown-container */
-/* Countdown height is approx 2.67rem. New margin-bottom is 0.25rem.
-   So, padding-top = 2.67rem + 0.25rem = 2.92rem. Round to 2.9rem.
+/* Countdown height is approx 2.67rem. New margin-bottom is 0rem.
+   So, padding-top = 2.67rem + 0rem = 2.67rem. Round to 2.7rem.
 */
 .task-countdown-container + .main-content {
-  padding-top: 2.9rem; /* Original: 3.2rem */
+  padding-top: 2.7rem; /* Original: 2.9rem */
 }
 
 /* Tabs Styling */
