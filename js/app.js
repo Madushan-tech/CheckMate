@@ -513,12 +513,20 @@ class CheckMateApp {
     const newlyInsertedTaskCountdownContainer = overallAppContainer.querySelector('.task-countdown-container');
     if (headerElement && newlyInsertedTaskCountdownContainer && headerElement.style.display !== 'none') {
       const headerHeight = headerElement.offsetHeight;
-      // The margin-top is part of the .task-countdown-container's own style in CSS.
-      // The 'top' for sticky positioning should be exactly the header's height.
-      newlyInsertedTaskCountdownContainer.style.top = headerHeight + 'px';
+      // Calculate 0.5rem in pixels for the gap.
+      // Use parseFloat and getComputedStyle on documentElement for robust rem to px conversion.
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const gapInPixels = 0.5 * rootFontSize;
+
+      newlyInsertedTaskCountdownContainer.style.top = (headerHeight + gapInPixels) + 'px';
 
     } else if (newlyInsertedTaskCountdownContainer) {
-      newlyInsertedTaskCountdownContainer.style.top = '0px'; // Fallback if header isn't visible
+      // If header isn't visible, countdown should stick at top with a small gap perhaps, or 0.
+      // For now, let's assume if header is not there, it sticks to top:0 or a minimal gap.
+      // Let's apply the same gap from top if header is not there.
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const gapInPixels = 0.5 * rootFontSize;
+      newlyInsertedTaskCountdownContainer.style.top = gapInPixels + 'px';
     }
 
     this.initializeAndDisplayTaskCountdown(); // Initialize countdown for home page
