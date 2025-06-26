@@ -415,20 +415,43 @@ class CheckMateApp {
     `;
   }
 
-  loadHomePage(container) {
-    // Container for task display and countdown, replacing the old timestamp
-    const taskCountdownHTML = `
-      <div class="task-countdown-container">
+  loadHomePage(mainContentContainer) { // Renamed 'container' for clarity
+    // Clear existing content from mainContentContainer
+    mainContentContainer.innerHTML = '';
+
+    // Create and insert the task countdown container
+    // It should be a child of '.container' (parent of header and main-content),
+    // and placed between header and main-content.
+
+    const overallAppContainer = document.querySelector('.container'); // This is the parent of header, main-content etc.
+    const headerElement = document.querySelector('.header');
+
+    // Remove existing countdown container if it was somehow left from a previous load
+    let existingCountdownContainer = overallAppContainer.querySelector('.task-countdown-container');
+    if (existingCountdownContainer) {
+        existingCountdownContainer.remove();
+    }
+
+    const taskCountdownDiv = document.createElement('div');
+    taskCountdownDiv.className = 'task-countdown-container';
+    taskCountdownDiv.innerHTML = `
         <div class="task-display">
-            <span id="task-name-full"></span> <!-- Changed to single span -->
+            <span id="task-name-full"></span>
         </div>
         <div id="countdown-timer" class="countdown-timer"></div>
-      </div>
     `;
 
-    container.innerHTML = `
-      ${taskCountdownHTML}
+    if (overallAppContainer && headerElement) {
+      // Insert taskCountdownDiv after headerElement, within overallAppContainer
+      headerElement.insertAdjacentElement('afterend', taskCountdownDiv);
+    } else {
+      console.error("Could not find .container or .header to insert task countdown.");
+      // Fallback: Prepend to mainContentContainer if header/overallContainer not found, though this is not the target structure.
+      // mainContentContainer.insertAdjacentElement('beforebegin', taskCountdownDiv); // This would put it before mainContentContainer
+    }
 
+    // Now, populate the mainContentContainer (passed as 'container' argument)
+    mainContentContainer.innerHTML = `
       <section class="stats-section">
         <div class="section-header">
           <h2 class="section-title">Today Journey</h2>
@@ -485,24 +508,23 @@ class CheckMateApp {
     // as tab content population is reverted.
 
     // Adjust sticky top for task countdown container
-    const headerElement = document.querySelector('.header');
-    const taskCountdownContainer = container.querySelector('.task-countdown-container'); // Query within the newly set container
-    if (headerElement && taskCountdownContainer && headerElement.style.display !== 'none') {
+    // The taskCountdownContainer is now a sibling of mainContentContainer, not a child.
+    // We need to select it from the document or the overallAppContainer.
+    const newlyInsertedTaskCountdownContainer = overallAppContainer.querySelector('.task-countdown-container');
+    if (headerElement && newlyInsertedTaskCountdownContainer && headerElement.style.display !== 'none') {
       const headerHeight = headerElement.offsetHeight;
-      const taskContainerMarginTop = parseFloat(getComputedStyle(taskCountdownContainer).marginTop);
-      taskCountdownContainer.style.top = (headerHeight + taskContainerMarginTop) + 'px';
-      // We want the margin to still provide space from header, then sticky positions from there.
-      // So, top should be headerHeight. The margin-top on the element itself will create the visual space.
-      taskCountdownContainer.style.top = headerHeight + 'px';
+      // The margin-top is part of the .task-countdown-container's own style in CSS.
+      // The 'top' for sticky positioning should be exactly the header's height.
+      newlyInsertedTaskCountdownContainer.style.top = headerHeight + 'px';
 
-    } else if (taskCountdownContainer) {
-      taskCountdownContainer.style.top = '0px'; // Fallback if header isn't visible
+    } else if (newlyInsertedTaskCountdownContainer) {
+      newlyInsertedTaskCountdownContainer.style.top = '0px'; // Fallback if header isn't visible
     }
 
     this.initializeAndDisplayTaskCountdown(); // Initialize countdown for home page
   }
 
-  loadPlanPage(container) {
+  loadPlanPage(mainContentContainer) { // Renamed 'container' for clarity
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;

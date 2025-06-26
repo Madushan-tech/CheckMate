@@ -105,6 +105,7 @@ body {
   position: sticky;
   /* top: 61px; */ /* Removed: Now set by JavaScript */
   z-index: 99; /* Below header (z-index 100) but above other content */
+  width: 100%; /* Ensure it spans the full width of its sticky context */
 }
 
 .task-display {
@@ -139,8 +140,37 @@ body {
 /* Main Content */
 .main-content {
   flex: 1;
-  padding: 0 1rem 6rem;
+  /* Adjusted top padding:
+     Original was 0.
+     Approx height of task-countdown-container:
+     padding (0.75rem * 2 = 1.5rem) + text (approx 1.2rem) = ~2.7rem.
+     Its margin-bottom is 1rem.
+     So, main-content needs to be clear of this.
+     However, task-countdown-container's margin-top (0.5rem) means it already has some space from header.
+     The main-content padding-top should account for the space taken by the task-countdown-container itself
+     when it's part of the layout before sticking.
+     Let's use a value that's roughly its own height (padding + content)
+     plus its own margin-bottom, so content starts below that.
+     Estimated height of .task-countdown-container: (0.75rem * 2) + ~1.2rem (for text) = ~2.7rem.
+     It has margin-top: 0.5rem and margin-bottom: 1rem.
+     The effective space it takes before main-content starts is its height + its margin-bottom.
+     So, padding-top for main-content should be ~ (2.7rem + 1rem) = 3.7rem.
+     Let's try a slightly smaller, fixed value like 3.5rem to start, or calculate more accurately.
+     The element itself has padding: 0.75rem top/bottom. Text is 0.9em * 1.3 line-height = 1.17em.
+     If 1em = 16px (typical default), then 1.17em = ~18.72px (~1.17rem).
+     So height is 1.5rem + 1.17rem = 2.67rem.
+     It has margin-bottom: 1rem.
+     So the main-content should have padding-top of at least 2.67rem + 1rem = 3.67rem to clear it.
+     Let's use 3.75rem to be safe and provide a little gap.
+  */
+  /* padding: 3.75rem 1rem 6rem; */ /* Reverted: Original: 0 1rem 6rem, will be handled by adjacent sibling selector */
+  padding: 0 1rem 6rem; /* Restore original padding */
   overflow-y: auto;
+}
+
+/* Apply padding-top to main-content only when it's directly preceded by a task-countdown-container */
+.task-countdown-container + .main-content {
+  padding-top: 3.75rem;
 }
 
 /* Tabs Styling */
