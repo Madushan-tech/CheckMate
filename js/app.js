@@ -22,41 +22,34 @@ class CheckMateApp {
       this.countdownInterval = null;
     }
 
-    const taskNameElement1 = document.getElementById('task-line-1');
-    const taskNameElement2 = document.getElementById('task-line-2');
+    const taskNameElement = document.getElementById('task-name-full'); // Changed ID
     const countdownElement = document.getElementById('countdown-timer');
 
     // --- Placeholder Task Data ---
     // This should be replaced with actual task data retrieval logic
-    let currentTaskName = "Learning Python Programming";
+    let currentTaskName = "Learning Python Programming Language for Beginners"; // Made longer for testing truncation
     // Example: Get end time for today at 10:00 AM
     let taskEndTime = new Date();
     taskEndTime.setHours(10, 0, 0, 0);
     // If current time is past 10 AM, set it for next day for demo purposes
     if (new Date() > taskEndTime) {
       taskEndTime.setDate(taskEndTime.getDate() + 1);
-      currentTaskName = "Project Scoping Meeting"; // Example of a different task for tomorrow
+      currentTaskName = "Project Scoping Meeting for New Client Onboarding"; // Made longer
       taskEndTime.setHours(11, 30, 0, 0); // Example end time for tomorrow's task
     }
     // --- End Placeholder Task Data ---
 
-    if (!taskNameElement1 || !taskNameElement2 || !countdownElement) {
-      console.error("Header countdown elements not found!");
+    if (!taskNameElement || !countdownElement) { // Simplified check
+      console.error("Task display or countdown elements not found!");
       return;
     }
 
-    // Function to wrap the third word
+    // Simplified function to set the task name (CSS will handle truncation)
     const displayTaskName = (fullName) => {
-      const words = fullName.split(' ');
-      if (words.length >= 3) {
-        taskNameElement1.textContent = words.slice(0, 2).join(' ');
-        taskNameElement2.textContent = words.slice(2).join(' '); // Remaining words on line 2
-      } else if (words.length > 0) {
-        taskNameElement1.textContent = fullName;
-        taskNameElement2.textContent = ""; // No second line
+      if (fullName) {
+        taskNameElement.textContent = fullName;
       } else {
-        taskNameElement1.textContent = "No active task";
-        taskNameElement2.textContent = "";
+        taskNameElement.textContent = "No active task";
       }
     };
 
@@ -68,7 +61,7 @@ class CheckMateApp {
         countdownElement.textContent = "Ended";
         displayTaskName(currentTaskName); // Keep showing task name
         // Optionally, clear the interval if no new task is immediately available
-        // clearInterval(countdownInterval);
+        // clearInterval(this.countdownInterval);
         return;
       }
 
@@ -76,7 +69,7 @@ class CheckMateApp {
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
       countdownElement.textContent = `${minutes} Min ${seconds} Sec`;
-      displayTaskName(currentTaskName);
+      displayTaskName(currentTaskName); // Call simplified display function
     };
 
     updateCountdown(); // Initial call
@@ -232,8 +225,7 @@ class CheckMateApp {
     const taskCountdownHTML = `
       <div class="task-countdown-container">
         <div class="task-display">
-            <span id="task-line-1"></span>
-            <span id="task-line-2"></span>
+            <span id="task-name-full"></span> <!-- Changed to single span -->
         </div>
         <div id="countdown-timer" class="countdown-timer"></div>
       </div>
