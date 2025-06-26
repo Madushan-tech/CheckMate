@@ -103,7 +103,7 @@ body {
   border-radius: 0.5rem; /* Optional: rounded corners */
   color: var(--text-primary);
   position: sticky;
-  top: 61px; /* Approximate header height (0.5rem * 2 padding + 45px logo) */
+  /* top: 61px; */ /* Removed: Now set by JavaScript */
   z-index: 99; /* Below header (z-index 100) but above other content */
 }
 
@@ -318,6 +318,33 @@ body {
   align-items: center;
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+.progress-bar-container {
+  height: 8px;
+  background-color: var(--border-color); /* Darker background for the bar */
+  border-radius: 4px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--accent-green);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.view-steps-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--accent-yellow);
+  text-decoration: none;
+}
+
+.view-steps-link:hover {
+  text-decoration: underline;
 }
 
 /* Section Headers */
@@ -598,6 +625,90 @@ body {
   background-color: #bfdbfe;
   transform: translateY(-1px);
 }
+
+/* Styles for Steps Modal */
+.modal-header .close-modal-btn { /* More specific selector for close button in modal header */
+  cursor: pointer;
+  position: absolute;
+  top: 1rem; /* Adjust to align with padding/title */
+  right: 1rem;
+  font-size: 1.5rem; /* Material icon default size */
+  color: var(--text-secondary); /* Softer color */
+}
+
+.modal-header .close-modal-btn:hover {
+  color: var(--text-primary); /* Or primary text color of modal */
+}
+
+.steps-list-ul { /* Styling for the UL inside the modal */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--primary-bg); /* Ensure text color is for light background */
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb; /* Light border between items */
+  flex-wrap: wrap; /* Allow actions to wrap if needed, though ideally not */
+}
+
+.step-item:last-child {
+  border-bottom: none;
+}
+
+.step-item input[type="checkbox"] {
+  margin-right: 0.75rem;
+  /* Use custom checkbox styles if available, or default */
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-green); /* Color for the checkmark */
+}
+
+.step-item label {
+  flex-grow: 1;
+  font-size: 0.9rem;
+  color: #374151; /* Darker text for readability on light modal */
+}
+
+.step-item .step-toggle-arrow {
+  cursor: pointer;
+  margin-left: 0.5rem;
+  color: #6b7280; /* Medium gray for icon */
+  transition: transform 0.2s ease;
+}
+
+.step-item .step-toggle-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.step-actions {
+  width: 100%;
+  padding: 0.5rem 0 0.5rem 2.5rem; /* Indent below checkbox and label */
+  background-color: #f9fafb; /* Slightly different background for actions */
+  margin-top: 0.5rem;
+  border-radius: 4px;
+  display: flex; /* For button layout */
+  gap: 0.5rem; /* Space between buttons */
+}
+
+.btn-step-action {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: #fff;
+  color: var(--primary-bg);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-step-action:hover {
+  background-color: #f0f0f0;
+}
+
 
 /* Responsive Design */
 @media (min-width: 768px) {

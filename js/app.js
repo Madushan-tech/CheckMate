@@ -13,7 +13,156 @@ class CheckMateApp {
     this.setupSearch();
     this.loadCurrentPage(); // This will call loadHomePage if on home, which now calls initializeAndDisplayTaskCountdown
     this.setupTabs();
+    this.setupStepsModalInteraction(); // New method call
     // Removed this.startTaskCountdown(); - it's now handled by loadHomePage
+  }
+
+  setupStepsModalInteraction() {
+    const stepsModalOverlay = document.getElementById('steps-modal-overlay');
+
+    // Event listener for "View Steps" links (delegated to mainContent)
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.addEventListener('click', (e) => {
+        if (e.target.classList.contains('view-steps-link')) {
+          e.preventDefault();
+          const taskId = e.target.dataset.taskId;
+          this.openStepsModal(taskId);
+        }
+      });
+    }
+
+    // Event listener for closing the modal
+    if (stepsModalOverlay) {
+      stepsModalOverlay.addEventListener('click', (e) => {
+        if (e.target === stepsModalOverlay || e.target.closest('.close-modal-btn')) {
+          this.closeStepsModal();
+        }
+      });
+    }
+
+    // Event listeners for step interactions (checkbox, toggle arrow) within the modal
+    const stepsListUl = document.getElementById('steps-list');
+    if (stepsListUl) {
+      stepsListUl.addEventListener('click', (e) => {
+        const target = e.target;
+        // Handle checkbox change
+        if (target.type === 'checkbox' && target.dataset.stepId) {
+          const stepId = target.dataset.stepId;
+          const taskId = target.dataset.taskId;
+          const isChecked = target.checked;
+          this.updateTaskStepCompletion(taskId, stepId, isChecked);
+        }
+        // Handle toggle arrow click
+        else if (target.classList.contains('step-toggle-arrow') && target.dataset.stepId) {
+          const stepId = target.dataset.stepId;
+          this.toggleStepActions(stepId, target);
+        }
+      });
+    }
+  }
+
+  updateTaskStepCompletion(taskId, stepId, isChecked) {
+    // Find the task and step in your data structure and update it
+    // For now, this is a placeholder. In a real app, update state and potentially re-render.
+    const task = this.getUpcomingTasks().find(t => t.id === taskId);
+    if (task && task.steps) {
+      const step = task.steps.find(s => s.id === stepId);
+      if (step) {
+        step.completed = isChecked;
+        console.log(`Task ${taskId}, Step ${stepId} completion changed to ${isChecked}`);
+        // TODO: Recalculate and update overall task progress on the main card
+        // TODO: Update progress bar on main card
+      }
+    }
+  }
+
+  toggleStepActions(stepId, arrowElement) {
+    const stepActionsDiv = document.querySelector(`.step-actions[data-step-id="${stepId}"]`);
+    if (stepActionsDiv) {
+      const isExpanded = stepActionsDiv.style.display !== 'none';
+      stepActionsDiv.style.display = isExpanded ? 'none' : 'block';
+      arrowElement.classList.toggle('expanded', !isExpanded);
+      arrowElement.textContent = isExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_up';
+
+      // Populate actions if expanding and not already populated (or always repopulate)
+      if (!isExpanded && !stepActionsDiv.hasChildNodes()) { // Simple check: only populate once
+        this.populateStepActions(stepActionsDiv, stepId);
+      }
+    }
+  }
+
+  populateStepActions(actionsContainer, stepId) {
+    // This is where buttons for "Cancel", "Forward", "Date/Time Update" will be added
+    // Placeholder for now - actual implementation in next step
+    actionsContainer.innerHTML = `
+      <button class="btn-step-action" data-action="cancel" data-step-id="${stepId}">Cancel Step</button>
+      <button class="btn-step-action" data-action="forward" data-step-id="${stepId}">Forward Step</button>
+      <button class="btn-step-action" data-action="update-time" data-step-id="${stepId}">Update Time</button>
+    `;
+
+    actionsContainer.querySelectorAll('.btn-step-action').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        const stepId = e.target.dataset.stepId;
+        this.handleStepSubAction(action, stepId);
+      });
+    });
+  }
+
+  handleStepSubAction(action, stepId) {
+    // Placeholder for actual functionality
+    console.log(`Sub-action clicked: ${action} for step ${stepId}`);
+    // In a real app, you would implement logic for:
+    // - 'cancel': Mark step as cancelled, or remove it, etc.
+    // - 'forward': Reschedule this step for the next day.
+    // - 'update-time': Open a date/time picker to change the step's due date/time.
+    alert(`Action: ${action}\nStep ID: ${stepId}\n(Placeholder - check console)`);
+  }
+
+  openStepsModal(taskId) {
+    const tasks = this.getUpcomingTasks(); // In a real app, this might come from a state manager
+    const task = tasks.find(t => t.id === taskId);
+    const stepsModalOverlay = document.getElementById('steps-modal-overlay');
+    const stepsListUl = document.getElementById('steps-list');
+    const modalTitle = document.getElementById('steps-modal-title');
+
+    if (!task || !stepsModalOverlay || !stepsListUl || !modalTitle) {
+      console.error('Could not open steps modal, task or modal elements not found.');
+      return;
+    }
+
+    modalTitle.textContent = `${task.title} - Steps`;
+    stepsListUl.innerHTML = ''; // Clear previous steps
+
+    if (task.steps && task.steps.length > 0) {
+      task.steps.forEach(step => {
+        const li = document.createElement('li');
+        li.className = 'step-item'; // Will add styles later
+        li.innerHTML = `
+          <input type="checkbox" id="step-${step.id}" ${step.completed ? 'checked' : ''} data-step-id="${step.id}" data-task-id="${taskId}">
+          <label for="step-${step.id}">${step.title}</label>
+          <span class="material-icons step-toggle-arrow" data-step-id="${step.id}">keyboard_arrow_down</span>
+          <div class="step-actions" style="display:none;" data-step-id="${step.id}">
+            <!-- Sub-actions will be populated here -->
+          </div>
+        `;
+        stepsListUl.appendChild(li);
+      });
+    } else {
+      stepsListUl.innerHTML = '<li>No steps defined for this task.</li>';
+    }
+
+    stepsModalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+  }
+
+  closeStepsModal() {
+    const stepsModalOverlay = document.getElementById('steps-modal-overlay');
+    if (stepsModalOverlay) {
+      stepsModalOverlay.classList.remove('active');
+      document.body.style.overflow = ''; // Restore background scroll
+    }
   }
 
   initializeAndDisplayTaskCountdown() {
@@ -179,9 +328,14 @@ class CheckMateApp {
     const headerElement = document.querySelector('.header');
     if (headerElement) {
       if (page === 'home') {
-        headerElement.style.display = 'flex'; // Or remove a 'hidden' class
+        headerElement.style.display = 'flex';
       } else {
-        headerElement.style.display = 'none'; // Or add a 'hidden' class
+        headerElement.style.display = 'none';
+        // If task container might exist from a previous SPA state (though it's cleared by innerHTML typically)
+        const taskCountdownContainer = document.querySelector('.task-countdown-container');
+        if (taskCountdownContainer) {
+            taskCountdownContainer.style.top = '0px'; // Reset if header is not there
+        }
       }
     }
 
@@ -209,7 +363,7 @@ class CheckMateApp {
     }
   }
 
-  loadProfilePage(container) { // Added function for profile page
+  loadProfilePage(container) {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
@@ -288,6 +442,22 @@ class CheckMateApp {
     `;
     // Note: The tab content area defined in index.html will remain, but will be empty
     // as tab content population is reverted.
+
+    // Adjust sticky top for task countdown container
+    const headerElement = document.querySelector('.header');
+    const taskCountdownContainer = container.querySelector('.task-countdown-container'); // Query within the newly set container
+    if (headerElement && taskCountdownContainer && headerElement.style.display !== 'none') {
+      const headerHeight = headerElement.offsetHeight;
+      const taskContainerMarginTop = parseFloat(getComputedStyle(taskCountdownContainer).marginTop);
+      taskCountdownContainer.style.top = (headerHeight + taskContainerMarginTop) + 'px';
+      // We want the margin to still provide space from header, then sticky positions from there.
+      // So, top should be headerHeight. The margin-top on the element itself will create the visual space.
+      taskCountdownContainer.style.top = headerHeight + 'px';
+
+    } else if (taskCountdownContainer) {
+      taskCountdownContainer.style.top = '0px'; // Fallback if header isn't visible
+    }
+
     this.initializeAndDisplayTaskCountdown(); // Initialize countdown for home page
   }
 
@@ -455,6 +625,12 @@ class CheckMateApp {
           <span>${task.time}</span>
           <span>${task.project}</span>
         </div>
+        ${task.type === 'multi-step' ? `
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${task.progress * 100}%;"></div>
+          </div>
+          <a href="#" class="view-steps-link" data-task-id="${task.id}">View Steps</a>
+        ` : ''}
       </div>
     `).join('');
   }
@@ -462,6 +638,7 @@ class CheckMateApp {
   getUpcomingTasks() { // Renamed function
     return [
       {
+        id: 'task1', // Added ID
         title: 'Smith Script Write',
         time: '4:00 P.M. - 6:00 P.M.',
         project: 'Project 003',
@@ -470,15 +647,24 @@ class CheckMateApp {
         starred: true
       },
       {
+        id: 'task2', // Added ID
         title: 'Script App Development',
         time: '7:00 P.M. - 8:00 P.M.',
         project: 'Project 001',
         icon: 'code',
         iconColor: 'text-gray',
-        starred: true
-        // Reverted: Removed type, subSteps, progress
+        starred: true,
+        type: 'multi-step', // Added type
+        progress: 0.5, // Example progress (50%)
+        steps: [ // Added steps
+          { id: 'step2.1', title: 'Define core features', completed: true },
+          { id: 'step2.2', title: 'Design database schema', completed: true },
+          { id: 'step2.3', title: 'Develop API endpoints', completed: false },
+          { id: 'step2.4', title: 'Frontend implementation', completed: false }
+        ]
       },
       {
+        id: 'task3', // Added ID
         title: 'Video Editing',
         time: '9:00 P.M. - 10:00 P.M.',
         project: 'Project 006',
