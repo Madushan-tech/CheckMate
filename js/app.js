@@ -474,7 +474,8 @@ class CheckMateApp {
     // Conditional Header Display & Sticky Elements Positioning
     const headerElement = document.querySelector('.header');
     const taskCountdownContainer = document.querySelector('.task-countdown-container');
-    const tabsContainer = document.querySelector('.tabs'); // Select the tabs container
+    // const tabsContainer = document.querySelector('.tabs'); // Tabs no longer need dynamic sticky positioning here
+    const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // More specific selector
 
     if (headerElement && taskCountdownContainer) {
       const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -484,47 +485,37 @@ class CheckMateApp {
 
       if (page === 'home') {
         headerElement.style.display = 'flex';
-        // Ensure header is rendered before getting offsetHeight
-        requestAnimationFrame(() => { // Wait for layout update
+        requestAnimationFrame(() => {
             const headerHeight = headerElement.offsetHeight;
             countdownTopPosition = headerHeight + gapInPixels;
             taskCountdownContainer.style.top = countdownTopPosition + 'px';
-
-            if (tabsContainer) {
-                // Ensure taskCountdownContainer's height is known after its top is set
-                requestAnimationFrame(() => {
-                    const countdownHeight = taskCountdownContainer.offsetHeight;
-                    tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
-                });
-            }
+            // No specific sticky positioning for date filter on home page
         });
       } else { // For 'plan', 'report', 'profile' pages
         headerElement.style.display = 'none';
-        countdownTopPosition = gapInPixels; // Countdown is directly under the top edge (with a gap)
+        countdownTopPosition = gapInPixels;
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
-        if (tabsContainer) {
-            // Ensure taskCountdownContainer's height is known after its top is set
+        if (page === 'plan' && dateFilterContainer) { // Only apply to dateFilter on plan page
             requestAnimationFrame(() => {
                 const countdownHeight = taskCountdownContainer.offsetHeight;
-                // The tabs should stick right below the countdown timer
-                tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
             });
         }
       }
-    } else if (taskCountdownContainer && tabsContainer) {
-        // Fallback if headerElement is not found but others are (e.g. header removed from HTML)
-        // This part might need adjustment based on expected behavior without a header
+    } else if (taskCountdownContainer) { // Fallback if headerElement is not found
         const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
         const gapInPixels = 0.5 * rootFontSize;
         let countdownTopPosition = gapInPixels;
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
-        requestAnimationFrame(() => {
-            const countdownHeight = taskCountdownContainer.offsetHeight;
-            tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
-        });
-    }
 
+        if (page === 'plan' && dateFilterContainer) { // Only apply to dateFilter on plan page
+            requestAnimationFrame(() => {
+                const countdownHeight = taskCountdownContainer.offsetHeight;
+                dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+            });
+        }
+    }
 
     // Update page content
     this.currentPage = page;
