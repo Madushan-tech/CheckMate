@@ -947,23 +947,32 @@ body {
 .bg-orange { background-color: var(--accent-orange); }
 .bg-gray { background-color: var(--text-secondary); }
 
-/* Sticky Date Filter for Plan Page */
-.plan-page-content .date-filter { /* Added parent class for specificity */
-  position: -webkit-sticky; /* For Safari */
-  position: sticky;
-  top: 0px; /* Stick to the top of its scrolling container (.main-content) */
+/* Fixed Date Filter for Plan Page */
+.plan-page-content .date-filter {
+  position: fixed;
+  /* top: value will be set by JavaScript */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px; /* Should match .container max-width */
+  box-sizing: border-box; /* Ensure padding is included in width/max-width */
+
   background-color: var(--primary-bg);
   z-index: 98; /* Below header (100) and countdown (99) */
-  padding-top: 0.25rem; /* Reduced from 0.75rem */
-  padding-bottom: 0.75rem;
-  /* The .date-filter already has margin-bottom: 1.5rem, which is good space below */
-  /* To make it appear full width like the header/countdown: */
-  margin-left: -1rem; /* Assuming parent .main-content has 1rem padding */
-  margin-right: -1rem; /* Assuming parent .main-content has 1rem padding */
-  padding-left: 1rem; /* Restore padding for buttons inside */
-  padding-right: 1rem; /* Restore padding for buttons inside */
+
+  padding: 0.25rem 1rem 0.75rem 1rem; /* top, horizontal, bottom */
+  /* margin-left, margin-right removed as it's now fixed and centered */
+
   border-bottom: 1px solid var(--border-color); /* Visual separation */
+  /* Ensure overflow-x is still handled for the buttons if they exceed width */
+  overflow-x: auto; /* From original .date-filter style */
+  scrollbar-width: none; /* From original .date-filter style */
+  -ms-overflow-style: none; /* From original .date-filter style */
 }
+.plan-page-content .date-filter::-webkit-scrollbar { /* From original .date-filter style */
+  display: none;
+}
+
 
 /* Dark Theme for New Task Modal */
 .new-task-modal-content-dark {
@@ -1235,6 +1244,8 @@ body {
   cursor: pointer;
   z-index: 1050; /* Above bottom nav (1000) but below modals (2000) */
   transition: background-color 0.3s ease, transform 0.2s ease;
+  -webkit-transform: translateZ(0); /* Attempt to force layer and ensure fixed behavior */
+  transform: translateZ(0); /* Attempt to force layer and ensure fixed behavior */
 }
 
 .fab:hover {

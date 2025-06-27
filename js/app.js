@@ -660,51 +660,99 @@ class CheckMateApp {
         });
       } else { // For 'plan', 'report', 'profile' pages
         headerElement.style.display = 'none';
+        // countdownTopPosition is the desired top for the countdown timer itself
         countdownTopPosition = gapInPixels;
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
         if (page === 'plan') {
-            requestAnimationFrame(() => {
-                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
-                if (dateFilterContainer) {
-                    // const countdownHeight = taskCountdownContainer.offsetHeight; // No longer needed for this adjustment
-                    // dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px'; // REMOVED: This was causing the large space. CSS handles sticky top.
+          requestAnimationFrame(() => {
+            // Ensure elements exist after DOM update from loadPlanPage
+            const currentCountdownContainer = document.querySelector('.task-countdown-container');
+            const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
+            const mainContentEl = document.querySelector('.main-content'); // The main scrolling container
 
-                    // Adjust padding for the content below the date filter
-                    const planPageContentContainer = document.querySelector('.plan-page-content');
-                    if (planPageContentContainer) {
-                        const dateFilterHeight = dateFilterContainer.offsetHeight;
-                        const desiredGap = 8; // e.g., 8px, adjust as needed
-                        // The main-content already has padding-top to account for countdown.
-                        // This padding is for content *within* plan-page-content, below the date-filter.
-                        planPageContentContainer.style.paddingTop = (dateFilterHeight + desiredGap) + 'px';
-                    }
+            if (currentCountdownContainer && dateFilterContainer && mainContentEl) {
+              const countdownRect = currentCountdownContainer.getBoundingClientRect();
+              // Top for date filter = countdown's actual top + its height + small gap
+              // countdownRect.top is relative to viewport. countdownTopPosition is the styled 'top'.
+              // Use offsetHeight for actual rendered height.
+              const countdownBottom = parseFloat(currentCountdownContainer.style.top || 0) + currentCountdownContainer.offsetHeight;
+              const dateFilterTop = countdownBottom + (0.0 * rootFontSize); // 0.5rem gap, or 0 for flush
+              dateFilterContainer.style.top = dateFilterTop + 'px';
+
+              // Padding for the main scrollable content area to clear both fixed elements
+              const dateFilterHeight = dateFilterContainer.offsetHeight; // Get height after it's positioned (may need a frame)
+              const totalFixedHeight = dateFilterTop + dateFilterHeight;
+
+              // The .main-content already has padding: 0 1rem 6rem;
+              // The CSS .task-countdown-container + .main-content { padding-top: 0.5rem; }
+              // This 0.5rem was to clear only the countdown. Now we need to clear both.
+              // So, the padding-top of .main-content should be totalFixedHeight + desired_gap_below_date_filter
+              const mainContentPaddingTop = totalFixedHeight + (1 * rootFontSize); // 1rem gap below date filter before content starts
+              mainContentEl.style.paddingTop = mainContentPaddingTop + 'px';
+
+              // The .plan-page-content itself should not have extra padding-top if .main-content handles it.
+              // However, the date-filter is part of .plan-page-content in the HTML structure,
+              // but visually it's fixed. The .tasks-list is what needs to not be obscured.
+              // If .date-filter is fixed, .plan-page-content's normal flow starts with .tasks-list.
+              // So, if mainContentEl.style.paddingTop clears both, then .plan-page-content doesn't need additional padding.
+              const planPageContentEl = document.querySelector('.plan-page-content');
+              if (planPageContentEl) {
+                planPageContentEl.style.paddingTop = '0'; // Reset any previous dynamic padding
+              }
+            }
+          });
+        } else {
+            // Reset main-content padding for other pages if it was changed for plan page
+            const mainContentEl = document.querySelector('.main-content');
+            if (mainContentEl) {
+                // Re-apply the conditional padding for countdown if it exists
+                if (taskCountdownContainer && taskCountdownContainer.nextElementSibling === mainContentEl) {
+                    mainContentEl.style.paddingTop = (0.5 * rootFontSize) + 'px'; // Default from CSS
+                } else {
+                    mainContentEl.style.paddingTop = '0'; // Or whatever its default should be
                 }
-            });
+            }
         }
       }
-    } else if (taskCountdownContainer) { // Fallback if headerElement is not found
+    } else if (taskCountdownContainer) { // Fallback if headerElement is not found (e.g. header hidden by default)
         const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
         const gapInPixels = 0.5 * rootFontSize;
-        let countdownTopPosition = gapInPixels;
-        taskCountdownContainer.style.top = countdownTopPosition + 'px';
+        // countdownTopPosition is the desired top for the countdown timer itself
+        let effectiveCountdownTop = gapInPixels;
+        taskCountdownContainer.style.top = effectiveCountdownTop + 'px';
 
         if (page === 'plan') {
             requestAnimationFrame(() => {
+                const currentCountdownContainer = document.querySelector('.task-countdown-container');
                 const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
-                if (dateFilterContainer) {
-                    const countdownHeight = taskCountdownContainer.offsetHeight;
-                    dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                const mainContentEl = document.querySelector('.main-content');
 
-                    // Adjust padding for the content below the date filter
-                    const planPageContentContainer = document.querySelector('.plan-page-content');
-                    if (planPageContentContainer) {
-                        const dateFilterHeight = dateFilterContainer.offsetHeight;
-                        const desiredGap = 8; // e.g., 8px, adjust as needed
-                        planPageContentContainer.style.paddingTop = (dateFilterHeight + desiredGap) + 'px';
+                if (currentCountdownContainer && dateFilterContainer && mainContentEl) {
+                    const countdownBottom = parseFloat(currentCountdownContainer.style.top || 0) + currentCountdownContainer.offsetHeight;
+                    const dateFilterTop = countdownBottom + (0.0 * rootFontSize);
+                    dateFilterContainer.style.top = dateFilterTop + 'px';
+
+                    const dateFilterHeight = dateFilterContainer.offsetHeight;
+                    const totalFixedHeight = dateFilterTop + dateFilterHeight;
+                    const mainContentPaddingTop = totalFixedHeight + (1 * rootFontSize);
+                    mainContentEl.style.paddingTop = mainContentPaddingTop + 'px';
+
+                    const planPageContentEl = document.querySelector('.plan-page-content');
+                    if (planPageContentEl) {
+                        planPageContentEl.style.paddingTop = '0';
                     }
                 }
             });
+        } else {
+            const mainContentEl = document.querySelector('.main-content');
+            if (mainContentEl) {
+                if (taskCountdownContainer && taskCountdownContainer.nextElementSibling === mainContentEl) {
+                    mainContentEl.style.paddingTop = (0.5 * rootFontSize) + 'px';
+                } else {
+                    mainContentEl.style.paddingTop = '0';
+                }
+            }
         }
     }
 
