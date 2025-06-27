@@ -141,7 +141,14 @@
                         
                         <div class="checkbox-group">
                             <label class="checkbox-label">Multi-step</label>
-                            <input type="checkbox" name="multiStep" class="checkbox">
+                            <input type="checkbox" name="multiStep" class="checkbox" id="multiStepToggle">
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn-secondary btn-gemini" id="geminiAiButton">
+                                <span class="material-icons">auto_awesome</span> <!-- Placeholder for Gemini Logo -->
+                                Get steps with AI
+                            </button>
                         </div>
                     </div>
                     
@@ -170,6 +177,68 @@
                 <ul id="steps-list" class="steps-list-ul">
                     <!-- Steps will be populated by JavaScript -->
                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Step Task Modal -->
+    <div class="modal-overlay" id="multiStepTaskModal">
+        <div class="modal-content">
+            <div class="modal-handle">
+                <div class="modal-handle-bar"></div>
+            </div>
+            <div class="modal-header">
+                <h1 class="modal-title" id="multiStepTaskNameHeading">Steps for: <span></span></h1>
+                <span class="material-icons close-modal-btn" data-modal-id="multiStepTaskModal">close</span>
+            </div>
+            <div class="modal-body">
+                <form id="multiStepTaskForm">
+                    <!-- Step fields will be dynamically added here or managed by JS -->
+                    <div class="step-entry-form">
+                        <div class="form-group">
+                            <input type="text"
+                                   name="stepName"
+                                   class="form-input"
+                                   placeholder="Step name"
+                                   aria-label="Step name">
+                        </div>
+                        <div class="form-group">
+                            <textarea name="stepDescription"
+                                      class="form-textarea"
+                                      placeholder="Short description for step"
+                                      aria-label="Step description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Step date and time (optional)</label>
+                            <div class="datetime-input-group">
+                                <input type="datetime-local"
+                                       name="stepDatetime"
+                                       class="datetime-input"
+                                       aria-label="Select date and time for step">
+                                <span class="material-icons datetime-icon">calendar_today</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">Set step as alarm</label>
+                                <input type="checkbox" name="stepAlarm" class="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Area for added steps list (optional preview) -->
+                    <div id="addedStepsPreview" style="margin-bottom: 1rem;">
+                        <!-- Steps added so far could be listed here by JS -->
+                    </div>
+
+                    <div class="form-group button-group">
+                        <button type="button" class="btn-secondary" id="addAnotherStepButton">
+                            <span class="material-icons">add_circle_outline</span> Add Another Step
+                        </button>
+                        <button type="button" class="btn-primary" id="doneMultiStepButton">
+                            <span class="material-icons">done_all</span> Done Adding Steps
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

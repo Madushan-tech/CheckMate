@@ -15,8 +15,118 @@ class CheckMateApp {
     this.setupSearch();
     this.loadCurrentPage();
     this.setupTabs();
-    this.setupStepsModalInteraction(); // New method call
-    this.initializeAndDisplayTaskCountdown(); // Call global countdown timer
+    this.setupStepsModalInteraction();
+    this.initializeAndDisplayTaskCountdown();
+    this.setupMultiStepModalLogic(); // New setup for multi-step modal
+  }
+
+  setupMultiStepModalLogic() {
+    const multiStepToggle = document.getElementById('multiStepToggle');
+    const multiStepModal = document.getElementById('multiStepTaskModal');
+    const mainNewTaskModal = document.querySelector('.modal-overlay:not(#steps-modal-overlay):not(#multiStepTaskModal)'); // Assumes first one is main
+    const taskNameInput = mainNewTaskModal ? mainNewTaskModal.querySelector('input[name="taskName"]') : null;
+    const multiStepTaskNameHeading = document.getElementById('multiStepTaskNameHeading')?.querySelector('span');
+    const closeMultiStepModalBtn = multiStepModal ? multiStepModal.querySelector('.close-modal-btn') : null;
+    const addAnotherStepButton = document.getElementById('addAnotherStepButton');
+    const doneMultiStepButton = document.getElementById('doneMultiStepButton');
+    const multiStepForm = document.getElementById('multiStepTaskForm');
+
+    this.currentSteps = []; // Initialize array to store steps for the current task
+
+    if (multiStepToggle && mainNewTaskModal && taskNameInput && multiStepModal && multiStepTaskNameHeading) {
+      multiStepToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          const taskName = taskNameInput.value.trim();
+          if (!taskName) {
+            // alert("Please enter a task name first."); // Or some other form of validation
+            // e.target.checked = false; // Prevent opening if no task name
+            // For now, let's allow opening and show placeholder if name is empty
+            multiStepTaskNameHeading.textContent = taskName || "New Task";
+          } else {
+            multiStepTaskNameHeading.textContent = taskName;
+          }
+          this.currentSteps = []; // Reset steps for new task
+          this.clearStepEntryForm(multiStepForm);
+          this.updateAddedStepsPreview([]); // Clear preview
+          multiStepModal.classList.add('active');
+          // mainNewTaskModal.classList.remove('active'); // Optionally hide the main modal
+        } else {
+          // Logic if user unchecks "Multi-step" - perhaps clear this.currentSteps if modal was opened
+          // For now, unchecking doesn't automatically close the multi-step modal if it's already open.
+        }
+      });
+    }
+
+    if (closeMultiStepModalBtn) {
+      closeMultiStepModalBtn.addEventListener('click', () => {
+        multiStepModal.classList.remove('active');
+        // Decide if mainNewTaskModal should re-appear if it was hidden
+        // if (!mainNewTaskModal.classList.contains('active')) {
+        //   mainNewTaskModal.classList.add('active');
+        // }
+      });
+    }
+
+    if (addAnotherStepButton && multiStepForm) {
+      addAnotherStepButton.addEventListener('click', () => {
+        const stepNameInput = multiStepForm.querySelector('input[name="stepName"]');
+        const stepDescriptionInput = multiStepForm.querySelector('textarea[name="stepDescription"]');
+        const stepDatetimeInput = multiStepForm.querySelector('input[name="stepDatetime"]');
+        const stepAlarmInput = multiStepForm.querySelector('input[name="stepAlarm"]');
+
+        const stepName = stepNameInput.value.trim();
+        if (!stepName) {
+          alert("Step name is required.");
+          return;
+        }
+
+        const newStep = {
+          id: `step_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Unique enough ID
+          title: stepName,
+          description: stepDescriptionInput.value.trim(),
+          time: stepDatetimeInput.value, // Will need parsing if used like main task time
+          alarm: stepAlarmInput.checked,
+          completed: false // Default
+        };
+        this.currentSteps.push(newStep);
+        this.updateAddedStepsPreview(this.currentSteps);
+        this.clearStepEntryForm(multiStepForm);
+        stepNameInput.focus(); // Focus back on step name for quick entry
+      });
+    }
+
+    if (doneMultiStepButton && multiStepModal) {
+        doneMultiStepButton.addEventListener('click', () => {
+            // Potentially one last add if form has data? Or require "Add step" first.
+            // For now, just closes. Data is in this.currentSteps.
+            console.log("Steps collected:", this.currentSteps); // For debugging
+            multiStepModal.classList.remove('active');
+            // mainNewTaskModal.classList.add('active'); // Re-activate main modal
+            // The main task form should now know it has steps. This needs further integration.
+        });
+    }
+  }
+
+  clearStepEntryForm(formElement) {
+    if (formElement) {
+      formElement.querySelector('input[name="stepName"]').value = '';
+      formElement.querySelector('textarea[name="stepDescription"]').value = '';
+      formElement.querySelector('input[name="stepDatetime"]').value = '';
+      formElement.querySelector('input[name="stepAlarm"]').checked = false;
+    }
+  }
+
+  updateAddedStepsPreview(steps) {
+    const previewContainer = document.getElementById('addedStepsPreview');
+    if (previewContainer) {
+      if (steps.length === 0) {
+        previewContainer.innerHTML = '<p class="text-gray" style="font-size: 0.9em;">No steps added yet.</p>';
+        return;
+      }
+      previewContainer.innerHTML = '<h4>Added Steps:</h4><ul>' +
+        steps.map(step => `<li style="font-size: 0.85em; margin-bottom: 0.3em;">${step.title} ${step.time ? '('+step.time+')': ''}</li>`).join('') +
+        '</ul>';
+    }
   }
 
   setupStepsModalInteraction() {
@@ -704,6 +814,15 @@ class CheckMateApp {
 
     // Re-setup date filter for this page
     this.setupDateFilter();
+
+    // Add Plus Icon Button for New Task
+    const fabButton = document.createElement('button');
+    fabButton.id = 'add-task-fab';
+    fabButton.classList.add('fab');
+    fabButton.innerHTML = '<span class="material-icons">add</span>';
+    fabButton.addEventListener('click', () => this.openNewTaskModal());
+    mainContentContainer.appendChild(fabButton); // Append to the main container of plan page
+
     // No need for setupStickyDateFilter() if CSS handles it with top:0 and correct z-index.
   }
 

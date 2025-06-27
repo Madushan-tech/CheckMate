@@ -8,7 +8,7 @@
   --card-bg: #1F2937;
   --text-primary: #FFFFFF;
   --text-secondary: #9CA3AF;
-  --accent-yellow: #FBBF24;
+  --accent-yellow: #FDFD96; /* Updated to new pale yellow */
   --accent-green: #10B981;
   --accent-red: #F44336;
   --accent-orange: #FF9800;
@@ -963,4 +963,33 @@ body {
   padding-left: 1rem; /* Restore padding for buttons inside */
   padding-right: 1rem; /* Restore padding for buttons inside */
   border-bottom: 1px solid var(--border-color); /* Visual separation */
+}
+
+/* Floating Action Button (FAB) for Add Task */
+.fab {
+  position: fixed; /* Fixed positioning relative to the viewport */
+  bottom: calc(6rem + 1rem); /* 6rem for bottom-nav height + 1rem spacing */
+  right: 1.5rem;
+  width: 56px;
+  height: 56px;
+  background-color: var(--accent-green);
+  color: var(--text-primary);
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 1050; /* Above bottom nav (1000) but below modals (2000) */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.fab:hover {
+  background-color: var(--accent-green-darker, #0D9276); /* Define if not already defined, or use a slightly darker shade */
+  transform: scale(1.05);
+}
+
+.fab .material-icons {
+  font-size: 28px;
 }
