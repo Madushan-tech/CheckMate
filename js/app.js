@@ -307,10 +307,18 @@ class CheckMateApp {
       }
     } else {
       // --- Default Placeholder Task Logic (for non-plan pages) ---
-      activeTaskName = "Learning Python Programming Language";
-      activeTaskEndTime = new Date(today);
-      activeTaskEndTime.setHours(today.getHours() + 1, 0, 0, 0); // Example: ends in 1 hour
-      // This is a simplified placeholder. You might want to restore previous complex placeholder if needed.
+      // Restore original placeholder logic more closely
+      let placeholderTaskName = "Learning Python Programming Language"; // Default
+      let placeholderEndTime = new Date(today);
+      placeholderEndTime.setHours(10, 0, 0, 0); // Default: Today 10:00 AM
+
+      if (new Date() > placeholderEndTime) { // If current time is past 10 AM today
+        placeholderTaskName = "Project Scoping Meeting"; // Default "next" task
+        placeholderEndTime.setDate(placeholderEndTime.getDate() + 1); // Tomorrow
+        placeholderEndTime.setHours(11, 30, 0, 0); // Tomorrow 11:30 AM
+      }
+      activeTaskName = placeholderTaskName;
+      activeTaskEndTime = placeholderEndTime;
     }
 
     taskNameElement.textContent = activeTaskName; // Display initial task name
@@ -627,10 +635,10 @@ class CheckMateApp {
 
     // Re-setup date filter for this page
     this.setupDateFilter();
-    // this.setupStickyDateFilter(); // Removed as 'top: 0px' is now in CSS
+    // No need for setupStickyDateFilter() if CSS handles it with top:0 and correct z-index.
   }
 
-  // Removed setupStickyDateFilter() method as it's no longer needed.
+  // Removed setupStickyDateFilter() as CSS with top:0px and correct z-index should handle stickiness.
 
   getPlanPageTasksSorted() {
     const tasks = this.getPlanPageTasks();
@@ -853,7 +861,7 @@ class CheckMateApp {
   }
 
   getPlanPageTasks() {
-    return [
+    const tasks = [
       // Daily Routine
       {
         id: 'planTask1', title: 'Wake Up & Morning Routine', time: '6:00 A.M. - 6:30 A.M.', project: 'Personal', icon: 'alarm', iconColor: 'text-blue-500', type: 'single-step'
@@ -863,10 +871,10 @@ class CheckMateApp {
       },
       // Learning & Office
       {
-        id: 'planTask3', title: 'Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
+        id: 'planTask3', title: 'Learning: Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
           { id: 'ppt3s1', title: 'Module 1: Asynchronous JS', completed: true }, { id: 'ppt3s2', title: 'Module 2: ES6+ Features', completed: false }, { id: 'ppt3s3', title: 'Module 3: Design Patterns', completed: false }, { id: 'ppt3s4', title: 'Module 4: Performance Optimization', completed: false }
         ]
-      },
+      }, // Title was already changed in previous step, re-adding category for consistency before stripping
       {
         id: 'planTask4', title: 'Office: Team Sync Meeting', time: '10:00 A.M. - 10:45 A.M.', project: 'Work', icon: 'work', iconColor: 'text-teal-500', type: 'single-step'
       },
@@ -917,6 +925,17 @@ class CheckMateApp {
         id: 'planTask15', title: 'Bedtime Routine & Sleep', time: '11:30 P.M. - 11:59 P.M.', project: 'Personal', icon: 'hotel', iconColor: 'text-blue-600', type: 'single-step' // hotel for bed/sleep
       },
     ];
+
+    return tasks.map(task => {
+      const parts = task.title.split(': ');
+      if (parts.length > 1) {
+        // Check if the first part is a likely category (e.g., starts with uppercase, is a single word or few words)
+        // For simplicity, we'll assume any title with ": " is a category prefix.
+        // A more robust check might involve a list of known categories.
+        return { ...task, title: parts.slice(1).join(': ') }; // Join back in case title itself had colons
+      }
+      return task;
+    });
   }
 
   openNewTaskModal() {
