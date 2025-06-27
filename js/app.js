@@ -497,11 +497,21 @@ class CheckMateApp {
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
         if (page === 'plan') {
-            requestAnimationFrame(() => { // Defer execution until after DOM updates and layout
-                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // Select here
-                if (dateFilterContainer) { // Check if element exists
+            requestAnimationFrame(() => {
+                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
+                if (dateFilterContainer) {
                     const countdownHeight = taskCountdownContainer.offsetHeight;
                     dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+
+                    // Adjust padding for the content below the date filter
+                    const planPageContentContainer = document.querySelector('.plan-page-content');
+                    if (planPageContentContainer) {
+                        const dateFilterHeight = dateFilterContainer.offsetHeight;
+                        const desiredGap = 8; // e.g., 8px, adjust as needed
+                        // The main-content already has padding-top to account for countdown.
+                        // This padding is for content *within* plan-page-content, below the date-filter.
+                        planPageContentContainer.style.paddingTop = (dateFilterHeight + desiredGap) + 'px';
+                    }
                 }
             });
         }
@@ -513,11 +523,19 @@ class CheckMateApp {
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
         if (page === 'plan') {
-            requestAnimationFrame(() => { // Defer execution
-                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // Select here
-                if (dateFilterContainer) { // Check if element exists
+            requestAnimationFrame(() => {
+                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
+                if (dateFilterContainer) {
                     const countdownHeight = taskCountdownContainer.offsetHeight;
                     dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+
+                    // Adjust padding for the content below the date filter
+                    const planPageContentContainer = document.querySelector('.plan-page-content');
+                    if (planPageContentContainer) {
+                        const dateFilterHeight = dateFilterContainer.offsetHeight;
+                        const desiredGap = 8; // e.g., 8px, adjust as needed
+                        planPageContentContainer.style.paddingTop = (dateFilterHeight + desiredGap) + 'px';
+                    }
                 }
             });
         }
