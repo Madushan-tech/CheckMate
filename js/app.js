@@ -4,6 +4,7 @@ class CheckMateApp {
     this.currentPage = 'home';
     this.countdownInterval = null; // Initialize countdownInterval property
     this.isReinitializing = false; // Flag for countdown re-initialization
+    this.highlightedTaskId = null; // Track currently highlighted task
     this.init();
   }
 
@@ -285,6 +286,15 @@ class CheckMateApp {
     let activeTaskEndTime = null;
     const today = new Date(); // Use a consistent "today" for all parsing in one cycle
 
+    // Clear previous highlight
+    if (this.highlightedTaskId) {
+      const prevHighlightedCard = document.querySelector(`.task-card[data-task-card-id="${this.highlightedTaskId}"]`);
+      if (prevHighlightedCard) {
+        prevHighlightedCard.classList.remove('current-task-highlight');
+      }
+      this.highlightedTaskId = null;
+    }
+
     // Apply plan page logic globally for countdown
     const planTasks = this.getPlanPageTasksSorted(); // Already sorted by time
     const nowTime = new Date(); // Current time for comparison
@@ -301,6 +311,12 @@ class CheckMateApp {
 
     if (foundTask) {
       activeTaskName = foundTask.title;
+      // Highlight the current task card
+      const currentTaskCard = document.querySelector(`.task-card[data-task-card-id="${foundTask.id}"]`);
+      if (currentTaskCard) {
+        currentTaskCard.classList.add('current-task-highlight');
+        this.highlightedTaskId = foundTask.id;
+      }
     } else {
       // If no current task from plan, check for the next upcoming task from the plan
       let nextTaskName = "No current tasks"; // Default if nothing is found
@@ -500,8 +516,8 @@ class CheckMateApp {
             requestAnimationFrame(() => {
                 const dateFilterContainer = document.querySelector('.plan-page-content .date-filter');
                 if (dateFilterContainer) {
-                    const countdownHeight = taskCountdownContainer.offsetHeight;
-                    dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                    // const countdownHeight = taskCountdownContainer.offsetHeight; // No longer needed for this adjustment
+                    // dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px'; // REMOVED: This was causing the large space. CSS handles sticky top.
 
                     // Adjust padding for the content below the date filter
                     const planPageContentContainer = document.querySelector('.plan-page-content');
