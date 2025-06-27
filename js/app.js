@@ -564,91 +564,46 @@ class CheckMateApp {
     mainContentContainer.innerHTML = `
       <div class="date-filter">
         <button class="date-btn">Tomorrow</button>
-        <button class="date-btn active">${todayStr}</button>
+        <button class="date-btn active">Today</button>
         <button class="date-btn">Yesterday</button>
         <button class="date-btn">${todayPlus3Str}</button>
         <button class="date-btn">${todayPlus2Str}</button>
         <button class="date-btn">Note</button>
       </div>
-
-      <section>
-        <div class="section-header">
-          <h2 class="section-title">Ongoing Tasks</h2>
-          <a href="#" class="see-more">See more</a>
-        </div>
-        <div class="task-card">
-          <div class="task-header">
-            <h3 class="task-title">Smith Script Write</h3>
-          </div>
-          <div class="task-meta">
-            <span>4:00 P.M. - 6:00 P.M.</span>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-header">
-          <h2 class="section-title">Forward to Tomorrow</h2>
-          <a href="#" class="see-more">See more</a>
-        </div>
-        <div class="task-card">
-          <div class="task-header">
-            <h3 class="task-title">Smith Script Write</h3>
-          </div>
-          <div class="task-meta">
-            <span>4:00 P.M. - 6:00 P.M.</span>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-header">
-          <h2 class="section-title">Complete</h2>
-          <a href="#" class="see-more">See more</a>
-        </div>
-        <div class="task-card">
-          <div class="task-header">
-            <h3 class="task-title">Script App Development</h3>
-          </div>
-          <div class="task-meta">
-            <span>7:00 P.M. - 8:00 P.M.</span>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-header">
-          <h2 class="section-title">Incomplete</h2>
-          <a href="#" class="see-more">See more</a>
-        </div>
-        <div class="task-card">
-          <div class="task-header">
-            <h3 class="task-title">Script App Development</h3>
-          </div>
-          <div class="task-meta">
-            <span>7:00 P.M. - 8:00 P.M.</span>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-header">
-          <h2 class="section-title">Cancel</h2>
-          <a href="#" class="see-more">See more</a>
-        </div>
-        <div class="task-card">
-          <div class="task-header">
-            <h3 class="task-title">Script App Development</h3>
-          </div>
-          <div class="task-meta">
-            <span>7:00 P.M. - 8:00 P.M.</span>
-          </div>
-        </div>
-      </section>
+      <div class="tasks-list">
+        ${this.generateTaskCards(this.getPlanPageTasksSorted())}
+      </div>
     `;
     
     // Re-setup date filter for this page
     this.setupDateFilter();
+  }
+
+  getPlanPageTasksSorted() {
+    const tasks = this.getPlanPageTasks();
+    // Basic time string sort (AM/PM aware, hour, then minute)
+    // This is a simplified sort; robust parsing would be better for complex cases.
+    // Assumes "H:MM A.M./P.M." format for start time.
+    tasks.sort((a, b) => {
+      const timeA = this.parseTime(a.time);
+      const timeB = this.parseTime(b.time);
+      return timeA.hour - timeB.hour || timeA.minute - timeB.minute;
+    });
+    return tasks;
+  }
+
+  parseTime(timeStr) {
+    // Extracts start time, e.g., "6:00 A.M." from "6:00 A.M. - 6:30 A.M."
+    const startTimeStr = timeStr.split(' - ')[0];
+    const [timePart, ampm] = startTimeStr.split(' ');
+    let [hour, minute] = timePart.split(':').map(Number);
+
+    if (ampm === 'P.M.' && hour !== 12) {
+      hour += 12;
+    } else if (ampm === 'A.M.' && hour === 12) { // Midnight case
+      hour = 0;
+    }
+    return { hour, minute };
   }
 
   loadReportPage(container) {
@@ -818,6 +773,73 @@ class CheckMateApp {
         icon: 'play_circle_filled',
         iconColor: 'text-green'
       }
+    ];
+  }
+
+  getPlanPageTasks() {
+    return [
+      // Daily Routine
+      {
+        id: 'planTask1', title: 'Wake Up & Morning Routine', time: '6:00 A.M. - 6:30 A.M.', project: 'Personal', icon: 'alarm', iconColor: 'text-blue-500', type: 'single-step'
+      },
+      {
+        id: 'planTask2', title: 'Breakfast', time: '7:00 A.M. - 7:30 A.M.', project: 'Personal', icon: 'free_breakfast', iconColor: 'text-orange-500', type: 'single-step'
+      },
+      // Learning & Office
+      {
+        id: 'planTask3', title: 'Online Course: Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
+          { id: 'ppt3s1', title: 'Module 1: Asynchronous JS', completed: true }, { id: 'ppt3s2', title: 'Module 2: ES6+ Features', completed: false }, { id: 'ppt3s3', title: 'Module 3: Design Patterns', completed: false }, { id: 'ppt3s4', title: 'Module 4: Performance Optimization', completed: false }
+        ]
+      },
+      {
+        id: 'planTask4', title: 'Office: Team Sync Meeting', time: '10:00 A.M. - 10:45 A.M.', project: 'Work', icon: 'work', iconColor: 'text-teal-500', type: 'single-step'
+      },
+      // Development
+      {
+        id: 'planTask5', title: 'Development: Feature Implementation (Task Manager App)', time: '11:00 A.M. - 1:00 P.M.', project: 'Work', icon: 'code', iconColor: 'text-green-500', type: 'multi-step', progress: 0.6, steps: [
+          { id: 'ppt5s1', title: 'Backend API for tasks', completed: true }, { id: 'ppt5s2', title: 'Frontend UI components', completed: true }, { id: 'ppt5s3', title: 'Integration and testing', completed: true }, { id: 'ppt5s4', title: 'Documentation', completed: false }, { id: 'ppt5s5', title: 'Deployment prep', completed: false }
+        ]
+      },
+      // Daily Tasks & Other
+      {
+        id: 'planTask6', title: 'Lunch Break', time: '1:00 P.M. - 1:45 P.M.', project: 'Personal', icon: 'restaurant', iconColor: 'text-orange-500', type: 'single-step'
+      },
+      {
+        id: 'planTask7', title: 'Daily Task: Grocery Shopping', time: '2:00 P.M. - 3:00 P.M.', project: 'Home', icon: 'shopping_cart', iconColor: 'text-red-400', type: 'single-step'
+      },
+      // Filmming
+      {
+        id: 'planTask8', title: 'Filmming: Shoot Scene for Short Film', time: '3:30 P.M. - 5:30 P.M.', project: 'Creative', icon: 'videocam', iconColor: 'text-indigo-500', type: 'multi-step', progress: 0.33, steps: [
+          { id: 'ppt8s1', title: 'Setup lighting & camera', completed: true }, { id: 'ppt8s2', title: 'Record Scene A takes', completed: false }, { id: 'ppt8s3', title: 'Record Scene B takes', completed: false }
+        ]
+      },
+      // Daily Tasks
+      {
+        id: 'planTask9', title: 'Daily Task: Clean Kitchen', time: '6:00 P.M. - 6:30 P.M.', project: 'Home', icon: 'cleaning_services', iconColor: 'text-lime-500', type: 'single-step'
+      },
+      // YouTube & Entertainment
+      {
+        id: 'planTask10', title: 'YouTube: Upload & Promote New Video', time: '7:00 P.M. - 8:00 P.M.', project: 'Content Creation', icon: 'video_library', iconColor: 'text-red-600', type: 'multi-step', progress: 0.5, steps: [
+          { id: 'ppt10s1', title: 'Final video edit check', completed: true }, { id: 'ppt10s2', title: 'Upload to YouTube', completed: true }, { id: 'ppt10s3', title: 'Write description & tags', completed: false }, { id: 'ppt10s4', title: 'Share on social media', completed: false }
+        ]
+      },
+      {
+        id: 'planTask11', title: 'Dinner', time: '8:00 P.M. - 8:45 P.M.', project: 'Personal', icon: 'dinner_dining', iconColor: 'text-orange-500', type: 'single-step'
+      },
+      {
+        id: 'planTask12', title: 'Entertainment: Watch Movie', time: '9:00 P.M. - 10:30 P.M.', project: 'Personal', icon: 'movie', iconColor: 'text-yellow-500', type: 'single-step'
+      },
+      // Other
+      {
+        id: 'planTask13', title: 'Other: Plan Tomorrow\'s Schedule', time: '10:30 P.M. - 10:45 P.M.', project: 'Personal', icon: 'event_note', iconColor: 'text-gray-500', type: 'single-step'
+      },
+      {
+        id: 'planTask14', title: 'Entertainment: Social Media Catch-up', time: '10:45 P.M. - 11:15 P.M.', project: 'Personal', icon: 'public', iconColor: 'text-blue-400', type: 'single-step'
+      },
+      // Daily Routine
+      {
+        id: 'planTask15', title: 'Bedtime Routine & Sleep', time: '11:30 P.M. - 11:59 P.M.', project: 'Personal', icon: 'hotel', iconColor: 'text-blue-600', type: 'single-step' // hotel for bed/sleep
+      },
     ];
   }
 
