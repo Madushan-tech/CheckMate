@@ -934,7 +934,7 @@ body {
 .plan-page-content .date-filter { /* Added parent class for specificity */
   position: -webkit-sticky; /* For Safari */
   position: sticky;
-  /* top value will be set by JS */
+  top: 0px; /* Stick to the top of its scrolling container */
   background-color: var(--primary-bg); /* Changed to primary-bg to match body */
   z-index: 100; /* Ensure it's above task cards but below modals, same as header */
   padding-top: 0.75rem;

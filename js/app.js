@@ -3,6 +3,7 @@ class CheckMateApp {
   constructor() {
     this.currentPage = 'home';
     this.countdownInterval = null; // Initialize countdownInterval property
+    this.isReinitializing = false; // Flag for countdown re-initialization
     this.init();
   }
 
@@ -327,17 +328,20 @@ class CheckMateApp {
 
       if (distance < 0) {
         countdownElement.textContent = "Ended";
-        taskNameElement.textContent = activeTaskName; // Keep showing task name
-        // Potentially call initializeAndDisplayTaskCountdown again to find the next task or show "No current task"
-        // This would require careful handling to avoid infinite loops or rapid calls.
-        // For now, it just shows "Ended". A more robust solution would re-scan for the next task.
-        // To rescan, we could clear interval and call `this.initializeAndDisplayTaskCountdown()`
-        // but need a flag to prevent rapid re-calls if there are no more tasks.
-        // Let's try a re-scan, but only if the current task has indeed ended.
-        // clearInterval(this.countdownInterval); // Stop this current interval
-        // this.initializeAndDisplayTaskCountdown(); // Re-initialize to find the next task
-        // This immediate re-call might be too aggressive. Better to update status and let the next 1-sec tick handle it.
-        // Or, the logic at the start of initializeAndDisplayTaskCountdown should find the *next* upcoming if current just ended.
+        taskNameElement.textContent = activeTaskName;
+
+        // If a task just ended on the plan page, try to find the next one after a short delay
+        if (this.currentPage === 'plan' && !this.isReinitializing) {
+            this.isReinitializing = true;
+            if (this.countdownInterval) { // Clear current interval before reinitializing
+              clearInterval(this.countdownInterval);
+              this.countdownInterval = null;
+            }
+            setTimeout(() => {
+                this.initializeAndDisplayTaskCountdown(); // This will find the next task or show "No current task"
+                this.isReinitializing = false;
+            }, 1500); // Wait 1.5s then refresh
+        }
         return;
       }
 
@@ -483,6 +487,7 @@ class CheckMateApp {
     // Update page content
     this.currentPage = page;
     this.loadPageContent(page);
+    this.initializeAndDisplayTaskCountdown(); // Refresh countdown with new page context
   }
 
   loadPageContent(page) {
@@ -605,7 +610,7 @@ class CheckMateApp {
     const todayPlus3Str = formatDate(todayPlus3);
 
     mainContentContainer.innerHTML = `
-      <div class="plan-page-content"> {/* Added wrapper for specific styling */}
+      <div class="plan-page-content">
         <div class="date-filter">
           <button class="date-btn">Tomorrow</button>
           <button class="date-btn active">Today</button>
@@ -617,78 +622,15 @@ class CheckMateApp {
       <div class="tasks-list">
         ${this.generateTaskCards(this.getPlanPageTasksSorted())}
       </div>
-    </div> {/* End of plan-page-content wrapper */}
+    </div>
     `;
 
     // Re-setup date filter for this page
     this.setupDateFilter();
-    this.setupStickyDateFilter();
+    // this.setupStickyDateFilter(); // Removed as 'top: 0px' is now in CSS
   }
 
-  setupStickyDateFilter() {
-    const countdownContainer = document.querySelector('.task-countdown-container');
-    const dateFilter = document.querySelector('.plan-page-content .date-filter');
-
-    if (countdownContainer && dateFilter) {
-      // Ensure elements are rendered to get correct height
-      requestAnimationFrame(() => {
-        const countdownHeight = countdownContainer.offsetHeight;
-        const mainContent = document.querySelector('.main-content');
-        const mainContentPaddingTop = parseFloat(getComputedStyle(mainContent).paddingTop);
-
-        // The top value should be the height of the countdown timer
-        // plus any gap defined by main-content's padding-top if the countdown is outside main-content.
-        // Since countdown is a sibling *before* main-content, its height is what matters.
-        // The date-filter is *inside* main-content.
-        // The .plan-page-content div is now the first child of .main-content.
-        // The date-filter is the first child of .plan-page-content.
-        // So, the sticky top for date-filter should be the height of the countdown timer.
-        // The countdown timer itself is sticky relative to the viewport.
-        // The date-filter will be sticky relative to its scroll container, which is main-content.
-        // The `top` for date-filter should be 0 if it's the first scrollable item.
-        // However, we want it to stick *below* the task-countdown-container.
-
-        // The 'task-countdown-container' is sticky to the viewport top (after header).
-        // The '.date-filter' is inside '.main-content'.
-        // For '.date-filter' to appear sticky below '.task-countdown-container',
-        // its 'top' value in CSS should be the height of the '.task-countdown-container'.
-        // BUT, `position:sticky`'s `top` is relative to its containing block or scroll container.
-        // The scroll container for `.date-filter` is `.main-content`.
-        // The `.task-countdown-container` is *outside* and *above* `.main-content`.
-
-        // Simpler approach: The CSS 'top' for .date-filter needs to be where it should stick within its scroll parent.
-        // If .task-countdown-container is visible and takes up space at the top of the viewport,
-        // and .date-filter is to stick right under it, the effective top for .date-filter within .main-content
-        // should be 0, as .main-content itself is positioned below the .task-countdown-container.
-        // The CSS `top` for sticky elements refers to the offset from the top of their containing block.
-        // Let's set it to 0 and rely on the structure.
-
-        // The CSS already has `position: sticky`. We need to set its `top` value.
-        // This `top` value is the distance from the top of the scrolling container (`.main-content`).
-        // If the `.task-countdown-container` has height `H_countdown`, and it's sticky at `T_countdown` from viewport top.
-        // The `.date-filter` should appear at `T_countdown + H_countdown`.
-        // The `.main-content` starts below `.task-countdown-container`.
-        // So, the `top` for `.date-filter` *within* `.main-content` should be 0.
-        // The visual effect of sticking below the countdown timer is achieved by the countdown timer
-        // also being sticky and occupying space above the main-content's scroll area.
-
-        // Let's test with top: 0 in CSS first. If that doesn't work due to stacking contexts or
-        // how browsers calculate sticky containing blocks, we might need to adjust.
-        // The current CSS does not set 'top'. It needs to be set.
-        // Let's assume the date-filter should stick at the very top of the .main-content scrolling area.
-        dateFilter.style.top = '0px'; // Stick to the top of the .main-content scroll area.
-
-        // The previous CSS for .date-filter was:
-        // .plan-page-content .date-filter { top value will be set by JS }
-        // This means we need to set it.
-        // The visual requirement is for it to be just under the task-countdown-container.
-        // The task-countdown-container is sticky. The main-content is scrollable.
-        // The date-filter is the first element in main-content (via plan-page-content wrapper).
-        // So its sticky 'top' should indeed be '0' relative to main-content.
-        // The spacing is handled by padding on the date-filter itself.
-      });
-    }
-  }
+  // Removed setupStickyDateFilter() method as it's no longer needed.
 
   getPlanPageTasksSorted() {
     const tasks = this.getPlanPageTasks();
