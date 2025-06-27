@@ -475,7 +475,7 @@ class CheckMateApp {
     const headerElement = document.querySelector('.header');
     const taskCountdownContainer = document.querySelector('.task-countdown-container');
     // const tabsContainer = document.querySelector('.tabs'); // Tabs no longer need dynamic sticky positioning here
-    const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // More specific selector
+    // const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // Selector moved into rAF
 
     if (headerElement && taskCountdownContainer) {
       const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -496,10 +496,13 @@ class CheckMateApp {
         countdownTopPosition = gapInPixels;
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
-        if (page === 'plan' && dateFilterContainer) { // Only apply to dateFilter on plan page
-            requestAnimationFrame(() => {
-                const countdownHeight = taskCountdownContainer.offsetHeight;
-                dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+        if (page === 'plan') {
+            requestAnimationFrame(() => { // Defer execution until after DOM updates and layout
+                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // Select here
+                if (dateFilterContainer) { // Check if element exists
+                    const countdownHeight = taskCountdownContainer.offsetHeight;
+                    dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                }
             });
         }
       }
@@ -509,10 +512,13 @@ class CheckMateApp {
         let countdownTopPosition = gapInPixels;
         taskCountdownContainer.style.top = countdownTopPosition + 'px';
 
-        if (page === 'plan' && dateFilterContainer) { // Only apply to dateFilter on plan page
-            requestAnimationFrame(() => {
-                const countdownHeight = taskCountdownContainer.offsetHeight;
-                dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+        if (page === 'plan') {
+            requestAnimationFrame(() => { // Defer execution
+                const dateFilterContainer = document.querySelector('.plan-page-content .date-filter'); // Select here
+                if (dateFilterContainer) { // Check if element exists
+                    const countdownHeight = taskCountdownContainer.offsetHeight;
+                    dateFilterContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                }
             });
         }
     }
