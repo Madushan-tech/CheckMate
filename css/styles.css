@@ -181,10 +181,15 @@ body {
 .tabs {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem; /* This might need adjustment if it causes layout issues when sticky */
   background-color: var(--secondary-bg);
   border-radius: 0.75rem;
   padding: 0.5rem;
+  position: sticky; /* Make tabs sticky */
+  /* top value will be set by JavaScript */
+  z-index: 98; /* Below header (100) and countdown (99) */
+  /* Ensure it has a background when sticky */
+  border-bottom: 1px solid var(--border-color); /* Optional: for visual separation */
 }
 
 .tab-link {

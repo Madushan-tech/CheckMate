@@ -471,26 +471,60 @@ class CheckMateApp {
       activeNavItem.classList.add('active');
     }
 
-    // Conditional Header Display
+    // Conditional Header Display & Sticky Elements Positioning
     const headerElement = document.querySelector('.header');
-    const taskCountdownContainer = document.querySelector('.task-countdown-container'); // Added this line
+    const taskCountdownContainer = document.querySelector('.task-countdown-container');
+    const tabsContainer = document.querySelector('.tabs'); // Select the tabs container
 
-    if (headerElement && taskCountdownContainer) { // Ensure both exist
+    if (headerElement && taskCountdownContainer) {
       const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const gapInPixels = 0.5 * rootFontSize;
+      const gapInPixels = 0.5 * rootFontSize; // 0.5rem gap
+
+      let countdownTopPosition = 0;
 
       if (page === 'home') {
         headerElement.style.display = 'flex';
         // Ensure header is rendered before getting offsetHeight
-        requestAnimationFrame(() => { // Use requestAnimationFrame to wait for layout update
+        requestAnimationFrame(() => { // Wait for layout update
             const headerHeight = headerElement.offsetHeight;
-            taskCountdownContainer.style.top = (headerHeight + gapInPixels) + 'px';
+            countdownTopPosition = headerHeight + gapInPixels;
+            taskCountdownContainer.style.top = countdownTopPosition + 'px';
+
+            if (tabsContainer) {
+                // Ensure taskCountdownContainer's height is known after its top is set
+                requestAnimationFrame(() => {
+                    const countdownHeight = taskCountdownContainer.offsetHeight;
+                    tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+                });
+            }
         });
-      } else {
+      } else { // For 'plan', 'report', 'profile' pages
         headerElement.style.display = 'none';
-        taskCountdownContainer.style.top = gapInPixels + 'px'; // Set to top with gap if header is hidden
+        countdownTopPosition = gapInPixels; // Countdown is directly under the top edge (with a gap)
+        taskCountdownContainer.style.top = countdownTopPosition + 'px';
+
+        if (tabsContainer) {
+            // Ensure taskCountdownContainer's height is known after its top is set
+            requestAnimationFrame(() => {
+                const countdownHeight = taskCountdownContainer.offsetHeight;
+                // The tabs should stick right below the countdown timer
+                tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+            });
+        }
       }
+    } else if (taskCountdownContainer && tabsContainer) {
+        // Fallback if headerElement is not found but others are (e.g. header removed from HTML)
+        // This part might need adjustment based on expected behavior without a header
+        const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const gapInPixels = 0.5 * rootFontSize;
+        let countdownTopPosition = gapInPixels;
+        taskCountdownContainer.style.top = countdownTopPosition + 'px';
+        requestAnimationFrame(() => {
+            const countdownHeight = taskCountdownContainer.offsetHeight;
+            tabsContainer.style.top = (countdownTopPosition + countdownHeight) + 'px';
+        });
     }
+
 
     // Update page content
     this.currentPage = page;
@@ -614,18 +648,22 @@ class CheckMateApp {
     };
 
     const todayStr = formatDate(today);
-    const todayPlus2Str = formatDate(todayPlus2);
-    const todayPlus3Str = formatDate(todayPlus3);
+    // const todayPlus2Str = formatDate(todayPlus2); // Not used in the new order
+    // const todayPlus3Str = formatDate(todayPlus3); // Not used in the new order
+
+    // Specific dates from the request
+    const date6_29_25_Str = "6/29/25";
+    const date6_30_25_Str = "6/30/25";
 
     mainContentContainer.innerHTML = `
       <div class="plan-page-content">
         <div class="date-filter">
           <button class="date-btn">Tomorrow</button>
           <button class="date-btn active">Today</button>
-        <button class="date-btn">Yesterday</button>
-        <button class="date-btn">${todayPlus3Str}</button>
-        <button class="date-btn">${todayPlus2Str}</button>
-        <button class="date-btn">Note</button>
+          <button class="date-btn">Yesterday</button>
+          <button class="date-btn">${date6_29_25_Str}</button>
+          <button class="date-btn">${date6_30_25_Str}</button>
+          <button class="date-btn">Note</button>
       </div>
       <div class="tasks-list">
         ${this.generateTaskCards(this.getPlanPageTasksSorted())}
