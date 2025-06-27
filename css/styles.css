@@ -965,6 +965,122 @@ body {
   border-bottom: 1px solid var(--border-color); /* Visual separation */
 }
 
+/* Dark Theme for New Task Modal */
+.new-task-modal-content-dark {
+  background-color: var(--secondary-bg, #1C1C1E); /* Dark background */
+  color: var(--text-primary, #FFFFFF); /* Light text */
+}
+
+.new-task-modal-content-dark .modal-body { /* Added specific padding for dark modal body */
+  padding: 1rem; /* Consistent padding around */
+}
+
+.new-task-modal-content-dark .modal-title {
+  color: var(--text-primary, #FFFFFF);
+}
+
+.new-task-modal-content-dark .modal-handle-bar {
+  background-color: var(--border-color, #374151); /* Darker handle bar */
+}
+
+.new-task-modal-content-dark .form-label {
+  color: var(--text-secondary, #9CA3AF); /* Slightly dimmer for labels */
+}
+
+.new-task-modal-content-dark .form-input,
+.new-task-modal-content-dark .datetime-input {
+  background-color: var(--primary-bg, #000000); /* Even darker for inputs */
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+}
+
+.new-task-modal-content-dark .form-textarea {
+  background-color: var(--primary-bg, #000000);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+  min-height: 90px; /* Reduced height for description textarea */
+  resize: vertical; /* Allow user to resize if they need more space */
+}
+
+.new-task-modal-content-dark .form-input::placeholder,
+.new-task-modal-content-dark .form-textarea::placeholder {
+  color: var(--text-secondary, #9CA3AF);
+  opacity: 0.7;
+}
+
+.new-task-modal-content-dark .form-input:focus,
+.new-task-modal-content-dark .form-textarea:focus,
+.new-task-modal-content-dark .datetime-input:focus {
+  background-color: #2a2a2e; /* Slightly lighter dark on focus */
+  border-color: var(--accent-green, #10B981); /* Use accent for focus border */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); /* Subtle glow for focus */
+}
+
+.new-task-modal-content-dark .datetime-input-group {
+  background-color: var(--primary-bg, #000000); /* Match input background */
+  border: 1px solid var(--border-color, #374151); /* Match input border */
+  border-radius: 0.75rem; /* Keep existing rounding */
+}
+
+.new-task-modal-content-dark .datetime-icon {
+  color: var(--text-secondary, #9CA3AF);
+}
+
+.new-task-modal-content-dark .checkbox-group {
+  background-color: transparent; /* Remove the light background it had */
+  padding: 0.5rem 0; /* Reduced vertical padding, removed horizontal */
+  margin-bottom: 0.75rem; /* Consistent spacing with other form groups if needed, or rely on parent form-group */
+}
+
+.new-task-modal-content-dark .checkbox-label {
+  color: var(--text-primary, #FFFFFF);
+}
+
+.new-task-modal-content-dark .checkbox {
+  border-color: var(--text-secondary, #9CA3AF);
+  background-color: transparent;
+}
+
+.new-task-modal-content-dark .checkbox:checked {
+  background-color: var(--accent-green, #10B981);
+  border-color: var(--accent-green, #10B981);
+}
+
+/* Ensure the primary button in the dark modal also fits the theme */
+.new-task-modal-content-dark .btn-primary {
+  background-color: var(--accent-green, #10B981);
+  color: var(--primary-bg, #000000); /* Dark text on accent button */
+  font-weight: 600;
+}
+.new-task-modal-content-dark .btn-primary:hover {
+  background-color: var(--accent-green-darker, #0D9276); /* Define if not already defined */
+}
+
+/* Styling for the new Gemini AI button in dark theme */
+.new-task-modal-content-dark .btn-gemini {
+  background-color: var(--card-bg, #1F2937); /* A distinct, but still dark, color */
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.new-task-modal-content-dark .btn-gemini .material-icons {
+  font-size: 1.2em;
+}
+.new-task-modal-content-dark .btn-gemini:hover {
+  background-color: var(--border-color, #374151);
+  transform: translateY(-1px);
+}
+
 /* Floating Action Button (FAB) for Add Task */
 .fab {
   position: fixed; /* Fixed positioning relative to the viewport */
