@@ -105,6 +105,25 @@ class CheckMateApp {
             // The main task form should now know it has steps. This needs further integration.
         });
     }
+
+    // Make calendar icon clickable for step datetime input in this modal
+    if (multiStepForm) {
+        const stepDateTimeInputGroup = multiStepForm.querySelector('.datetime-input-group'); // Assuming only one such group in this form
+        if (stepDateTimeInputGroup) {
+            const calendarIcon = stepDateTimeInputGroup.querySelector('.datetime-icon');
+            const dateTimeInput = stepDateTimeInputGroup.querySelector('input[type="datetime-local"]');
+            if (calendarIcon && dateTimeInput) {
+                calendarIcon.addEventListener('click', () => {
+                    try {
+                        dateTimeInput.showPicker();
+                    } catch (error) {
+                        console.warn("dateTimeInput.showPicker() is not supported in this browser or context.", error);
+                        dateTimeInput.focus(); // Fallback
+                    }
+                });
+            }
+        }
+    }
   }
 
   clearStepEntryForm(formElement) {
@@ -547,8 +566,12 @@ class CheckMateApp {
     if (modal) {
       // Close modal when clicking overlay
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          this.closeModal();
+        if (e.target === modal) { // Click on overlay
+          this.closeModal(modal.id); // Pass ID to be specific
+        }
+        if (e.target.closest('.close-modal-btn')) { // Click on a close button inside this modal
+            const modalIdToClose = e.target.closest('.close-modal-btn').dataset.modalId || modal.id;
+            this.closeModal(modalIdToClose);
         }
       });
 
@@ -559,6 +582,24 @@ class CheckMateApp {
           e.preventDefault();
           this.handleTaskSubmission(form);
         });
+
+        // Make calendar icon clickable for datetime input in this modal
+        const dateTimeInputGroup = form.querySelector('.datetime-input-group');
+        if (dateTimeInputGroup) {
+          const calendarIcon = dateTimeInputGroup.querySelector('.datetime-icon');
+          const dateTimeInput = dateTimeInputGroup.querySelector('input[type="datetime-local"]');
+          if (calendarIcon && dateTimeInput) {
+            calendarIcon.addEventListener('click', () => {
+              try {
+                dateTimeInput.showPicker();
+              } catch (error) {
+                console.warn("dateTimeInput.showPicker() is not supported in this browser or context.", error);
+                // Fallback: focus the input, browser might show picker
+                dateTimeInput.focus();
+              }
+            });
+          }
+        }
       }
     }
   }
@@ -1134,11 +1175,21 @@ class CheckMateApp {
     }
   }
 
-  closeModal() {
-    const modal = document.querySelector('.modal-overlay');
-    if (modal) {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
+  closeModal(modalId = null) {
+    let modalToClose;
+    if (modalId) {
+      modalToClose = document.getElementById(modalId);
+    } else {
+      // Fallback to original behavior if no ID is passed, though it's better to be specific
+      modalToClose = document.querySelector('.modal-overlay.active');
+    }
+
+    if (modalToClose && modalToClose.classList.contains('active')) {
+      modalToClose.classList.remove('active');
+      // Only reset body overflow if no other modals are active
+      if (!document.querySelector('.modal-overlay.active')) {
+        document.body.style.overflow = '';
+      }
     }
   }
 

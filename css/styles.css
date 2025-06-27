@@ -987,11 +987,17 @@ body {
   color: var(--text-secondary, #9CA3AF); /* Slightly dimmer for labels */
 }
 
-.new-task-modal-content-dark .form-input,
-.new-task-modal-content-dark .datetime-input {
+.new-task-modal-content-dark .form-input {
   background-color: var(--primary-bg, #000000); /* Even darker for inputs */
   color: var(--text-primary, #FFFFFF);
   border: 1px solid var(--border-color, #374151);
+}
+
+.new-task-modal-content-dark .datetime-input {
+  background-color: var(--primary-bg, #000000);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+  color-scheme: dark; /* Attempt to influence picker theme */
 }
 
 .new-task-modal-content-dark .form-textarea {
@@ -1080,6 +1086,136 @@ body {
   background-color: var(--border-color, #374151);
   transform: translateY(-1px);
 }
+
+/* Dark Theme for Multi-Step Task Modal */
+.multi-step-modal-content-dark {
+  background-color: var(--secondary-bg, #1C1C1E);
+  color: var(--text-primary, #FFFFFF);
+}
+
+.multi-step-modal-content-dark .modal-title {
+  color: var(--text-primary, #FFFFFF);
+}
+.multi-step-modal-content-dark .modal-title span { /* For the task name part */
+    color: var(--accent-green); /* Make task name stand out a bit */
+    font-weight: bold;
+}
+
+
+.multi-step-modal-content-dark .modal-handle-bar {
+  background-color: var(--border-color, #374151);
+}
+
+.multi-step-modal-content-dark .form-label {
+  color: var(--text-secondary, #9CA3AF);
+}
+
+.multi-step-modal-content-dark .form-input,
+.multi-step-modal-content-dark .form-textarea,
+.multi-step-modal-content-dark .datetime-input {
+  background-color: var(--primary-bg, #000000);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+}
+
+.multi-step-modal-content-dark .datetime-input {
+  color-scheme: dark; /* Attempt to influence picker theme */
+}
+
+.multi-step-modal-content-dark .form-input::placeholder,
+.multi-step-modal-content-dark .form-textarea::placeholder {
+  color: var(--text-secondary, #9CA3AF);
+  opacity: 0.7;
+}
+
+.multi-step-modal-content-dark .form-input:focus,
+.multi-step-modal-content-dark .form-textarea:focus,
+.multi-step-modal-content-dark .datetime-input:focus {
+  background-color: #2a2a2e;
+  border-color: var(--accent-green, #10B981);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+.multi-step-modal-content-dark .datetime-input-group {
+  background-color: var(--primary-bg, #000000);
+  border: 1px solid var(--border-color, #374151);
+  border-radius: 0.75rem;
+}
+
+.multi-step-modal-content-dark .datetime-icon {
+  color: var(--text-secondary, #9CA3AF);
+}
+
+.multi-step-modal-content-dark .checkbox-group {
+  background-color: transparent;
+  padding: 0.5rem 0;
+  margin-bottom: 0.75rem;
+}
+
+.multi-step-modal-content-dark .checkbox-label {
+  color: var(--text-primary, #FFFFFF);
+}
+
+.multi-step-modal-content-dark .checkbox {
+  border-color: var(--text-secondary, #9CA3AF);
+  background-color: transparent;
+}
+
+.multi-step-modal-content-dark .checkbox:checked {
+  background-color: var(--accent-green, #10B981);
+  border-color: var(--accent-green, #10B981);
+}
+
+.multi-step-modal-content-dark .btn-primary {
+  background-color: var(--accent-green, #10B981);
+  color: var(--primary-bg, #000000);
+  font-weight: 600;
+}
+.multi-step-modal-content-dark .btn-primary:hover {
+  background-color: var(--accent-green-darker, #0D9276);
+}
+
+.multi-step-modal-content-dark .btn-secondary { /* For 'Add Another Step' */
+  background-color: var(--card-bg, #1F2937);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--border-color, #374151);
+  /* Add other button stylings if not inheriting adequately */
+}
+.multi-step-modal-content-dark .btn-secondary:hover {
+  background-color: var(--border-color, #374151);
+}
+
+.multi-step-modal-content-dark .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem; /* Space above button group */
+}
+.multi-step-modal-content-dark .button-group button {
+    flex: 1; /* Make buttons share space */
+    padding: 0.75rem; /* Ensure decent padding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Space between icon and text in button */
+}
+.multi-step-modal-content-dark #addedStepsPreview {
+    color: var(--text-secondary);
+}
+.multi-step-modal-content-dark #addedStepsPreview h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+.multi-step-modal-content-dark #addedStepsPreview ul {
+    list-style: none;
+    padding-left: 0;
+}
+.multi-step-modal-content-dark #addedStepsPreview li {
+    background-color: var(--primary-bg);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-color);
+}
+
 
 /* Floating Action Button (FAB) for Add Task */
 .fab {
