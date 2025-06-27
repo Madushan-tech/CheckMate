@@ -204,8 +204,17 @@ class CheckMateApp {
   }
 
   openStepsModal(taskId) {
-    const tasks = this.getUpcomingTasks(); // In a real app, this might come from a state manager
-    const task = tasks.find(t => t.id === taskId);
+    let task;
+    if (this.currentPage === 'plan') {
+      const planTasks = this.getPlanPageTasks(); // Assuming this method exists and returns the plan tasks
+      task = planTasks.find(t => t.id === taskId);
+    }
+
+    if (!task) { // If not found in plan tasks or not on plan page, try upcoming tasks
+      const upcomingTasks = this.getUpcomingTasks();
+      task = upcomingTasks.find(t => t.id === taskId);
+    }
+
     const stepsModalOverlay = document.getElementById('steps-modal-overlay');
     const stepsModalContent = stepsModalOverlay.querySelector('.modal-content');
     const stepsListUl = document.getElementById('steps-list');
@@ -263,58 +272,92 @@ class CheckMateApp {
       this.countdownInterval = null;
     }
 
-    const taskNameElement = document.getElementById('task-name-full'); // Changed ID
+    const taskNameElement = document.getElementById('task-name-full');
     const countdownElement = document.getElementById('countdown-timer');
 
-    // --- Placeholder Task Data ---
-    // This should be replaced with actual task data retrieval logic
-    let currentTaskName = "Learning Python Programming Language for Beginners"; // Made longer for testing truncation
-    // Example: Get end time for today at 10:00 AM
-    let taskEndTime = new Date();
-    taskEndTime.setHours(10, 0, 0, 0);
-    // If current time is past 10 AM, set it for next day for demo purposes
-    if (new Date() > taskEndTime) {
-      taskEndTime.setDate(taskEndTime.getDate() + 1);
-      currentTaskName = "Project Scoping Meeting for New Client Onboarding"; // Made longer
-      taskEndTime.setHours(11, 30, 0, 0); // Example end time for tomorrow's task
-    }
-    // --- End Placeholder Task Data ---
-
-    if (!taskNameElement || !countdownElement) { // Simplified check
+    if (!taskNameElement || !countdownElement) {
       console.error("Task display or countdown elements not found!");
       return;
     }
 
-    // Simplified function to set the task name (CSS will handle truncation)
-    const displayTaskName = (fullName) => {
-      if (fullName) {
-        taskNameElement.textContent = fullName;
-      } else {
-        taskNameElement.textContent = "No active task";
+    let activeTaskName = "No active task";
+    let activeTaskEndTime = null;
+    const today = new Date(); // Use a consistent "today" for all parsing in one cycle
+
+    if (this.currentPage === 'plan') {
+      const planTasks = this.getPlanPageTasksSorted(); // Already sorted by time
+      const now = new Date(); // Current time for comparison
+
+      let foundTask = null;
+      for (const task of planTasks) {
+        const { startDate, endDate } = this.parseTaskDateTime(task.time, today);
+        if (now >= startDate && now < endDate) {
+          foundTask = task;
+          activeTaskEndTime = endDate;
+          break;
+        }
       }
-    };
+
+      if (foundTask) {
+        activeTaskName = foundTask.title;
+      } else {
+        activeTaskName = "No current task from plan";
+        // Optional: Find next task and show "Next: ..." or similar
+      }
+    } else {
+      // --- Default Placeholder Task Logic (for non-plan pages) ---
+      activeTaskName = "Learning Python Programming Language";
+      activeTaskEndTime = new Date(today);
+      activeTaskEndTime.setHours(today.getHours() + 1, 0, 0, 0); // Example: ends in 1 hour
+      // This is a simplified placeholder. You might want to restore previous complex placeholder if needed.
+    }
+
+    taskNameElement.textContent = activeTaskName; // Display initial task name
 
     const updateCountdown = () => {
       const now = new Date().getTime();
-      const distance = taskEndTime.getTime() - now;
 
-      if (distance < 0) {
-        countdownElement.textContent = "Ended";
-        displayTaskName(currentTaskName); // Keep showing task name
-        // Optionally, clear the interval if no new task is immediately available
-        // clearInterval(this.countdownInterval);
+      if (!activeTaskEndTime) {
+        countdownElement.textContent = "No schedule";
+        taskNameElement.textContent = activeTaskName; // Ensure it's updated if it changed
         return;
       }
 
+      const distance = activeTaskEndTime.getTime() - now;
+
+      if (distance < 0) {
+        countdownElement.textContent = "Ended";
+        taskNameElement.textContent = activeTaskName; // Keep showing task name
+        // Potentially call initializeAndDisplayTaskCountdown again to find the next task or show "No current task"
+        // This would require careful handling to avoid infinite loops or rapid calls.
+        // For now, it just shows "Ended". A more robust solution would re-scan for the next task.
+        // To rescan, we could clear interval and call `this.initializeAndDisplayTaskCountdown()`
+        // but need a flag to prevent rapid re-calls if there are no more tasks.
+        // Let's try a re-scan, but only if the current task has indeed ended.
+        // clearInterval(this.countdownInterval); // Stop this current interval
+        // this.initializeAndDisplayTaskCountdown(); // Re-initialize to find the next task
+        // This immediate re-call might be too aggressive. Better to update status and let the next 1-sec tick handle it.
+        // Or, the logic at the start of initializeAndDisplayTaskCountdown should find the *next* upcoming if current just ended.
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      countdownElement.textContent = `${minutes} Min ${seconds} Sec`;
-      displayTaskName(currentTaskName); // Call simplified display function
+      if (hours > 0) {
+        countdownElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        countdownElement.textContent = `${minutes}m ${seconds}s`;
+      }
+      taskNameElement.textContent = activeTaskName; // Update task name (could change if re-initialized)
     };
 
-    updateCountdown(); // Initial call
-    this.countdownInterval = setInterval(updateCountdown, 1000); // Store interval ID
+    if (this.countdownInterval) { // Clear existing interval before setting a new one
+        clearInterval(this.countdownInterval);
+    }
+    updateCountdown(); // Initial call to display immediately
+    this.countdownInterval = setInterval(updateCountdown, 1000);
   }
 
   setupTabs() {
@@ -562,9 +605,10 @@ class CheckMateApp {
     const todayPlus3Str = formatDate(todayPlus3);
 
     mainContentContainer.innerHTML = `
-      <div class="date-filter">
-        <button class="date-btn">Tomorrow</button>
-        <button class="date-btn active">Today</button>
+      <div class="plan-page-content"> {/* Added wrapper for specific styling */}
+        <div class="date-filter">
+          <button class="date-btn">Tomorrow</button>
+          <button class="date-btn active">Today</button>
         <button class="date-btn">Yesterday</button>
         <button class="date-btn">${todayPlus3Str}</button>
         <button class="date-btn">${todayPlus2Str}</button>
@@ -573,10 +617,77 @@ class CheckMateApp {
       <div class="tasks-list">
         ${this.generateTaskCards(this.getPlanPageTasksSorted())}
       </div>
+    </div> {/* End of plan-page-content wrapper */}
     `;
-    
+
     // Re-setup date filter for this page
     this.setupDateFilter();
+    this.setupStickyDateFilter();
+  }
+
+  setupStickyDateFilter() {
+    const countdownContainer = document.querySelector('.task-countdown-container');
+    const dateFilter = document.querySelector('.plan-page-content .date-filter');
+
+    if (countdownContainer && dateFilter) {
+      // Ensure elements are rendered to get correct height
+      requestAnimationFrame(() => {
+        const countdownHeight = countdownContainer.offsetHeight;
+        const mainContent = document.querySelector('.main-content');
+        const mainContentPaddingTop = parseFloat(getComputedStyle(mainContent).paddingTop);
+
+        // The top value should be the height of the countdown timer
+        // plus any gap defined by main-content's padding-top if the countdown is outside main-content.
+        // Since countdown is a sibling *before* main-content, its height is what matters.
+        // The date-filter is *inside* main-content.
+        // The .plan-page-content div is now the first child of .main-content.
+        // The date-filter is the first child of .plan-page-content.
+        // So, the sticky top for date-filter should be the height of the countdown timer.
+        // The countdown timer itself is sticky relative to the viewport.
+        // The date-filter will be sticky relative to its scroll container, which is main-content.
+        // The `top` for date-filter should be 0 if it's the first scrollable item.
+        // However, we want it to stick *below* the task-countdown-container.
+
+        // The 'task-countdown-container' is sticky to the viewport top (after header).
+        // The '.date-filter' is inside '.main-content'.
+        // For '.date-filter' to appear sticky below '.task-countdown-container',
+        // its 'top' value in CSS should be the height of the '.task-countdown-container'.
+        // BUT, `position:sticky`'s `top` is relative to its containing block or scroll container.
+        // The scroll container for `.date-filter` is `.main-content`.
+        // The `.task-countdown-container` is *outside* and *above* `.main-content`.
+
+        // Simpler approach: The CSS 'top' for .date-filter needs to be where it should stick within its scroll parent.
+        // If .task-countdown-container is visible and takes up space at the top of the viewport,
+        // and .date-filter is to stick right under it, the effective top for .date-filter within .main-content
+        // should be 0, as .main-content itself is positioned below the .task-countdown-container.
+        // The CSS `top` for sticky elements refers to the offset from the top of their containing block.
+        // Let's set it to 0 and rely on the structure.
+
+        // The CSS already has `position: sticky`. We need to set its `top` value.
+        // This `top` value is the distance from the top of the scrolling container (`.main-content`).
+        // If the `.task-countdown-container` has height `H_countdown`, and it's sticky at `T_countdown` from viewport top.
+        // The `.date-filter` should appear at `T_countdown + H_countdown`.
+        // The `.main-content` starts below `.task-countdown-container`.
+        // So, the `top` for `.date-filter` *within* `.main-content` should be 0.
+        // The visual effect of sticking below the countdown timer is achieved by the countdown timer
+        // also being sticky and occupying space above the main-content's scroll area.
+
+        // Let's test with top: 0 in CSS first. If that doesn't work due to stacking contexts or
+        // how browsers calculate sticky containing blocks, we might need to adjust.
+        // The current CSS does not set 'top'. It needs to be set.
+        // Let's assume the date-filter should stick at the very top of the .main-content scrolling area.
+        dateFilter.style.top = '0px'; // Stick to the top of the .main-content scroll area.
+
+        // The previous CSS for .date-filter was:
+        // .plan-page-content .date-filter { top value will be set by JS }
+        // This means we need to set it.
+        // The visual requirement is for it to be just under the task-countdown-container.
+        // The task-countdown-container is sticky. The main-content is scrollable.
+        // The date-filter is the first element in main-content (via plan-page-content wrapper).
+        // So its sticky 'top' should indeed be '0' relative to main-content.
+        // The spacing is handled by padding on the date-filter itself.
+      });
+    }
   }
 
   getPlanPageTasksSorted() {
@@ -604,6 +715,29 @@ class CheckMateApp {
       hour = 0;
     }
     return { hour, minute };
+  }
+
+  parseTaskDateTime(taskTimeString, referenceDate) {
+    const [startTimeStr, endTimeStr] = taskTimeString.split(' - ');
+
+    const parseSingleTime = (timeStr, refDate) => {
+      const date = new Date(refDate); // Clone reference date to avoid modifying it
+      const [timePart, ampm] = timeStr.split(' ');
+      let [hours, minutes] = timePart.split(':').map(Number);
+
+      if (ampm.toUpperCase() === 'P.M.' && hours !== 12) {
+        hours += 12;
+      } else if (ampm.toUpperCase() === 'A.M.' && hours === 12) { // Midnight case (12 AM is 00 hours)
+        hours = 0;
+      }
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    };
+
+    const startDate = parseSingleTime(startTimeStr, referenceDate);
+    const endDate = parseSingleTime(endTimeStr, referenceDate);
+
+    return { startDate, endDate };
   }
 
   loadReportPage(container) {
@@ -787,7 +921,7 @@ class CheckMateApp {
       },
       // Learning & Office
       {
-        id: 'planTask3', title: 'Online Course: Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
+        id: 'planTask3', title: 'Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
           { id: 'ppt3s1', title: 'Module 1: Asynchronous JS', completed: true }, { id: 'ppt3s2', title: 'Module 2: ES6+ Features', completed: false }, { id: 'ppt3s3', title: 'Module 3: Design Patterns', completed: false }, { id: 'ppt3s4', title: 'Module 4: Performance Optimization', completed: false }
         ]
       },
