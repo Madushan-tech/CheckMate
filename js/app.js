@@ -11,10 +11,10 @@ class CheckMateApp {
     this.setupModal();
     this.setupDateFilter();
     this.setupSearch();
-    this.loadCurrentPage(); // This will call loadHomePage if on home, which now calls initializeAndDisplayTaskCountdown
+    this.loadCurrentPage();
     this.setupTabs();
     this.setupStepsModalInteraction(); // New method call
-    // Removed this.startTaskCountdown(); - it's now handled by loadHomePage
+    this.initializeAndDisplayTaskCountdown(); // Call global countdown timer
   }
 
   setupStepsModalInteraction() {
@@ -418,16 +418,22 @@ class CheckMateApp {
 
     // Conditional Header Display
     const headerElement = document.querySelector('.header');
-    if (headerElement) {
+    const taskCountdownContainer = document.querySelector('.task-countdown-container'); // Added this line
+
+    if (headerElement && taskCountdownContainer) { // Ensure both exist
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const gapInPixels = 0.5 * rootFontSize;
+
       if (page === 'home') {
         headerElement.style.display = 'flex';
+        // Ensure header is rendered before getting offsetHeight
+        requestAnimationFrame(() => { // Use requestAnimationFrame to wait for layout update
+            const headerHeight = headerElement.offsetHeight;
+            taskCountdownContainer.style.top = (headerHeight + gapInPixels) + 'px';
+        });
       } else {
         headerElement.style.display = 'none';
-        // If task container might exist from a previous SPA state (though it's cleared by innerHTML typically)
-        const taskCountdownContainer = document.querySelector('.task-countdown-container');
-        if (taskCountdownContainer) {
-            taskCountdownContainer.style.top = '0px'; // Reset if header is not there
-        }
+        taskCountdownContainer.style.top = gapInPixels + 'px'; // Set to top with gap if header is hidden
       }
     }
 
@@ -456,10 +462,7 @@ class CheckMateApp {
   }
 
   loadProfilePage(container) {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
-    }
+    // Removed clearInterval for global countdown
     container.innerHTML = `
       <h1 class="page-title">Profile</h1>
       <p>Profile content will go here.</p>
@@ -470,38 +473,14 @@ class CheckMateApp {
     // Clear existing content from mainContentContainer
     mainContentContainer.innerHTML = '';
 
-    // Create and insert the task countdown container
-    // It should be a child of '.container' (parent of header and main-content),
-    // and placed between header and main-content.
+    // Task countdown container is now static in index.html, so no need to create/insert it.
+    // We still need to adjust its 'top' style based on header visibility.
 
-    const overallAppContainer = document.querySelector('.container'); // This is the parent of header, main-content etc.
+    const overallAppContainer = document.querySelector('.container');
     const headerElement = document.querySelector('.header');
+    const taskCountdownContainer = overallAppContainer.querySelector('.task-countdown-container'); // Select the static container
 
-    // Remove existing countdown container if it was somehow left from a previous load
-    let existingCountdownContainer = overallAppContainer.querySelector('.task-countdown-container');
-    if (existingCountdownContainer) {
-        existingCountdownContainer.remove();
-    }
-
-    const taskCountdownDiv = document.createElement('div');
-    taskCountdownDiv.className = 'task-countdown-container';
-    taskCountdownDiv.innerHTML = `
-        <div class="task-display">
-            <span id="task-name-full"></span>
-        </div>
-        <div id="countdown-timer" class="countdown-timer"></div>
-    `;
-
-    if (overallAppContainer && headerElement) {
-      // Insert taskCountdownDiv after headerElement, within overallAppContainer
-      headerElement.insertAdjacentElement('afterend', taskCountdownDiv);
-    } else {
-      console.error("Could not find .container or .header to insert task countdown.");
-      // Fallback: Prepend to mainContentContainer if header/overallContainer not found, though this is not the target structure.
-      // mainContentContainer.insertAdjacentElement('beforebegin', taskCountdownDiv); // This would put it before mainContentContainer
-    }
-
-    // Now, populate the mainContentContainer (passed as 'container' argument)
+    // Now, populate the mainContentContainer
     mainContentContainer.innerHTML = `
       <section class="stats-section">
         <div class="section-header">
@@ -558,43 +537,38 @@ class CheckMateApp {
     // Note: The tab content area defined in index.html will remain, but will be empty
     // as tab content population is reverted.
 
-    // Adjust sticky top for task countdown container
-    // The taskCountdownContainer is now a sibling of mainContentContainer, not a child.
-    // We need to select it from the document or the overallAppContainer.
-    const newlyInsertedTaskCountdownContainer = overallAppContainer.querySelector('.task-countdown-container');
-    if (headerElement && newlyInsertedTaskCountdownContainer && headerElement.style.display !== 'none') {
-      const headerHeight = headerElement.offsetHeight;
-      // Calculate 0.5rem in pixels for the gap.
-      // Use parseFloat and getComputedStyle on documentElement for robust rem to px conversion.
-      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const gapInPixels = 0.5 * rootFontSize;
-
-      newlyInsertedTaskCountdownContainer.style.top = (headerHeight + gapInPixels) + 'px';
-
-    } else if (newlyInsertedTaskCountdownContainer) {
-      // If header isn't visible, countdown should stick at top with a small gap perhaps, or 0.
-      // For now, let's assume if header is not there, it sticks to top:0 or a minimal gap.
-      // Let's apply the same gap from top if header is not there.
-      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const gapInPixels = 0.5 * rootFontSize;
-      newlyInsertedTaskCountdownContainer.style.top = gapInPixels + 'px';
-    }
-
-    this.initializeAndDisplayTaskCountdown(); // Initialize countdown for home page
+    // Adjust sticky top for task countdown container is now handled by navigateToPage.
+    // Countdown is now initialized globally, but we might want to update task details if specific to home page
+    // For now, let's assume initializeAndDisplayTaskCountdown handles its state correctly.
+    // If initializeAndDisplayTaskCountdown needs to be aware of the current page, that's a deeper refactor.
+    // this.initializeAndDisplayTaskCountdown(); // Re-evaluate if this is needed here or if global one is enough
   }
 
   loadPlanPage(mainContentContainer) { // Renamed 'container' for clarity
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
-    }
+    // Removed clearInterval for global countdown
+
+    const today = new Date();
+    const todayPlus2 = new Date(today);
+    todayPlus2.setDate(today.getDate() + 2);
+    const todayPlus3 = new Date(today);
+    todayPlus3.setDate(today.getDate() + 3);
+
+    const formatDate = (date) => {
+      return `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`;
+    };
+
+    const todayStr = formatDate(today);
+    const todayPlus2Str = formatDate(todayPlus2);
+    const todayPlus3Str = formatDate(todayPlus3);
+
     mainContentContainer.innerHTML = `
       <div class="date-filter">
         <button class="date-btn">Tomorrow</button>
-        <button class="date-btn active">Today</button>
+        <button class="date-btn active">${todayStr}</button>
         <button class="date-btn">Yesterday</button>
-        <button class="date-btn">2/1/25</button>
-        <button class="date-btn">1/31/25</button>
+        <button class="date-btn">${todayPlus3Str}</button>
+        <button class="date-btn">${todayPlus2Str}</button>
+        <button class="date-btn">Note</button>
       </div>
 
       <section>
@@ -678,10 +652,7 @@ class CheckMateApp {
   }
 
   loadReportPage(container) {
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-      this.countdownInterval = null;
-    }
+    // Removed clearInterval for global countdown
     container.innerHTML = `
       <div class="timestamp">
         ${this.getCurrentDateTime()}
