@@ -916,15 +916,19 @@ body {
 
 /* Current Task Highlighting */
 .task-card.current-task-highlight {
-  background-color: var(--accent-green-darker, #0D9276); /* A slightly darker green, or define a new variable */
-  border: 1px solid var(--accent-green, #10B981);
-  box-shadow: 0 0 10px var(--accent-green-transparent, rgba(16, 185, 129, 0.5));
-}
-/* Ensure this doesn't override hover effects too much, or integrate them */
-.task-card.current-task-highlight:hover {
-  background-color: var(--accent-green-darkest, #0A6F5A); /* Even darker on hover */
+  border: 2px solid #FDFD96; /* Specific pale yellow highlight color */
+  box-shadow: 0 0 8px rgba(253, 253, 150, 0.4); /* Adjusted glow to match #FDFD96 */
+  /* background-color: transparent; Explicitly ensure no background override if other rules might add one */
 }
 
+.task-card.current-task-highlight:hover {
+  border-width: 3px; /* Slightly thicker border on hover */
+  box-shadow: 0 0 12px rgba(253, 253, 150, 0.6); /* Adjusted glow to match #FDFD96 */
+  /* Ensure other hover effects like transform still apply if desired
+     The default .task-card:hover has transform: translateY(-2px);
+     This will still apply unless overridden here.
+  */
+}
 
 /* Utility Classes */
 .hidden {
