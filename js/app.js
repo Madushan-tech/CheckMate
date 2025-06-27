@@ -78,16 +78,34 @@ class CheckMateApp {
     if (task && task.steps) {
       const step = task.steps.find(s => s.id === stepId);
       if (step) {
-        step.completed = isChecked;
+        step.completed = isChecked; // Update data model
         console.log(`Task ${taskId}, Step ${stepId} completion changed to ${isChecked}`);
 
-        // Recalculate progress
+        // Update the UI for the specific step item in the modal
+        const stepLiElement = document.querySelector(`.step-item[data-step-id="${stepId}"][data-task-id="${taskId}"]`);
+        if (stepLiElement) {
+          const labelElement = stepLiElement.querySelector(`label[for="step-${stepId}"]`);
+          if (labelElement) {
+            if (isChecked) {
+              labelElement.classList.add('task-completed');
+            } else {
+              labelElement.classList.remove('task-completed');
+            }
+          }
+          // Ensure checkbox visual state matches, though browser usually handles this
+          const checkboxElement = stepLiElement.querySelector(`input[type="checkbox"]`);
+          if (checkboxElement) {
+            checkboxElement.checked = isChecked;
+          }
+        }
+
+        // Recalculate progress for the parent task
         const completedSteps = task.steps.filter(s => s.completed).length;
         const totalSteps = task.steps.length;
         task.progress = totalSteps > 0 ? (completedSteps / totalSteps) : 0;
 
         console.log(`Task ${taskId} new progress: ${task.progress}`);
-        this.updateTaskCardUI(taskId); // Update the UI
+        this.updateTaskCardUI(taskId); // Update the task card UI (progress bar)
       }
     }
   }
@@ -100,7 +118,21 @@ class CheckMateApp {
     if (taskCardElement) {
       const progressBarFill = taskCardElement.querySelector('.progress-bar-fill');
       if (progressBarFill) {
-        progressBarFill.style.width = (task.progress * 100) + '%';
+        const newWidth = task.progress * 100;
+        console.log(`Updating task ${taskId} progress bar. Raw progress: ${task.progress}, Width: ${newWidth}%`);
+        progressBarFill.style.width = newWidth + '%';
+      }
+      // Also update completed steps count on the card
+      const completedStepsCountElement = taskCardElement.querySelector('.completed-steps-count');
+      if (completedStepsCountElement && task.steps) {
+        completedStepsCountElement.textContent = `${task.steps.filter(s => s.completed).length}/${task.steps.length}`;
+      }
+      // Also update step info on the card
+      const taskStepInfoElement = taskCardElement.querySelector('.task-step-info');
+      if (taskStepInfoElement && task.steps && task.steps.length > 0) { // ensure steps exist
+          taskStepInfoElement.textContent = this.getStepInfo(task.steps);
+      } else if (taskStepInfoElement) {
+          taskStepInfoElement.textContent = ''; // Clear if no steps
       }
     }
   }
@@ -701,10 +733,10 @@ class CheckMateApp {
         </div>
         <div class="task-meta">
           <span>${task.time}</span>
-          <span>${task.project}</span>
           ${task.type === 'multi-step' && task.steps && task.steps.length > 0 ? `
             <span class="task-step-info">${this.getStepInfo(task.steps)}</span>
           ` : ''}
+          <span>${task.project}</span>
         </div>
         ${task.type === 'multi-step' ? `
           <div class="task-progress-section">
@@ -775,9 +807,9 @@ class CheckMateApp {
         title: 'Smith Script Write',
         time: '4:00 P.M. - 6:00 P.M.',
         project: 'Project 003',
-        icon: 'videocam', // Changed from 'engineering'
-        iconColor: 'text-green', // Changed from 'text-yellow'
-        secondaryIcon: { name: 'skip_next', color: 'text-green' }
+        icon: 'skip_next', // Swapped from videocam
+        iconColor: 'text-green',
+        secondaryIcon: { name: 'videocam', color: 'text-yellow' } // Swapped from skip_next, changed color
       },
       {
         id: 'task2', // Added ID
