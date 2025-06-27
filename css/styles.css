@@ -174,7 +174,7 @@ body {
    So, padding-top = 2.67rem + 0rem = 2.67rem. Round to 2.7rem.
 */
 .task-countdown-container + .main-content {
-  padding-top: 2.7rem; /* Original: 2.9rem */
+  padding-top: 1rem; /* Original: 2.9rem */
 }
 
 /* Tabs Styling */
@@ -352,9 +352,43 @@ body {
   align-items: center;
   font-size: 0.875rem;
   color: var(--text-secondary);
+  flex-wrap: wrap; /* Allow wrapping if content is too long */
+}
+
+.task-step-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary); /* Changed from var(--accent-yellow) */
+  margin-left: 0.5rem; /* Space after project info */
+  white-space: nowrap;
+}
+
+.task-progress-section {
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
 }
 
 .progress-bar-container {
+  flex-grow: 1; /* Allow progress bar to take available space */
+  height: 8px;
+  background-color: var(--border-color); /* Darker background for the bar */
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.completed-steps-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-left: 0.75rem; /* Space after the progress bar */
+}
+
+/* Ensure progress-bar-container itself doesn't have conflicting margin if it was standalone */
+.task-card .progress-bar-container {
+  margin-top: 0; /* Reset margin if it was previously directly under task-meta */
+}
+
+
+.progress-bar-fill {
   height: 8px;
   background-color: var(--border-color); /* Darker background for the bar */
   border-radius: 4px;
@@ -681,6 +715,70 @@ body {
   color: var(--primary-bg); /* Ensure text color is for light background */
 }
 
+/* Dark theme for steps modal */
+.modal-content.dark-theme {
+  background-color: var(--secondary-bg); /* Dark background */
+  color: var(--text-primary); /* Light text */
+}
+
+.modal-content.dark-theme .modal-title {
+  color: var(--text-primary); /* Light title text */
+}
+
+.modal-content.dark-theme .modal-handle-bar {
+  background-color: var(--border-color); /* Darker handle bar */
+}
+
+.modal-content.dark-theme .steps-list-ul {
+  color: var(--text-primary); /* Light text for list items */
+}
+
+.modal-content.dark-theme .step-item {
+  border-bottom: 1px solid var(--border-color); /* Darker border */
+}
+
+.modal-content.dark-theme .step-item label {
+  color: var(--text-primary); /* Light label text */
+}
+
+.modal-content.dark-theme .step-item label.task-completed {
+  color: var(--text-secondary); /* Dimmer color for completed tasks */
+  /* text-decoration: line-through; */ /* Removed */
+}
+
+.modal-content.dark-theme .step-item input[type="checkbox"] {
+  accent-color: var(--accent-green); /* Keep accent for checkbox */
+  /* Optional: Add border for better visibility on dark theme if needed */
+  /* border: 1px solid var(--text-secondary); */
+}
+
+.modal-content.dark-theme .step-toggle-arrow {
+  color: var(--text-secondary); /* Lighter arrow icon */
+}
+
+.modal-content.dark-theme .step-actions {
+  background-color: var(--primary-bg); /* Even darker background for actions */
+  border-top: 1px solid var(--border-color);
+}
+
+.modal-content.dark-theme .btn-step-action {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.modal-content.dark-theme .btn-step-action:hover {
+  background-color: var(--border-color);
+}
+
+.modal-content.dark-theme .close-modal-btn {
+  color: var(--text-secondary);
+}
+.modal-content.dark-theme .close-modal-btn:hover {
+  color: var(--text-primary);
+}
+
+
 .step-item {
   display: flex;
   align-items: center;
@@ -707,16 +805,12 @@ body {
   color: #374151; /* Darker text for readability on light modal */
 }
 
-.step-item .step-toggle-arrow {
-  cursor: pointer;
-  margin-left: 0.5rem;
-  color: #6b7280; /* Medium gray for icon */
-  transition: transform 0.2s ease;
+.step-item label.task-completed { /* Style for completed task labels (outside dark theme too if needed) */
+  color: var(--text-secondary); /* Or a specific color for inactive/completed */
+  /* text-decoration: line-through; */ /* Removed */
 }
 
-.step-item .step-toggle-arrow.expanded {
-  transform: rotate(180deg);
-}
+/* Removed .step-item .step-toggle-arrow and .step-item .step-toggle-arrow.expanded styles */
 
 .step-actions {
   width: 100%;

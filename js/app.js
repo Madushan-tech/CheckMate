@@ -163,13 +163,17 @@ class CheckMateApp {
     const tasks = this.getUpcomingTasks(); // In a real app, this might come from a state manager
     const task = tasks.find(t => t.id === taskId);
     const stepsModalOverlay = document.getElementById('steps-modal-overlay');
+    const stepsModalContent = stepsModalOverlay.querySelector('.modal-content');
     const stepsListUl = document.getElementById('steps-list');
     const modalTitle = document.getElementById('steps-modal-title');
 
-    if (!task || !stepsModalOverlay || !stepsListUl || !modalTitle) {
+    if (!task || !stepsModalOverlay || !stepsListUl || !modalTitle || !stepsModalContent) {
       console.error('Could not open steps modal, task or modal elements not found.');
       return;
     }
+
+    // Add dark theme class
+    stepsModalContent.classList.add('dark-theme');
 
     modalTitle.textContent = `${task.title} - Steps`;
     stepsListUl.innerHTML = ''; // Clear previous steps
@@ -180,12 +184,15 @@ class CheckMateApp {
         li.className = 'step-item'; // Will add styles later
         li.dataset.stepId = step.id; // Add stepId to li for easier access
         li.dataset.taskId = taskId;   // Add taskId to li for easier access
+        const labelClass = step.completed ? 'class="task-completed"' : '';
         li.innerHTML = `
           <input type="checkbox" id="step-${step.id}" ${step.completed ? 'checked' : ''} data-step-id="${step.id}" data-task-id="${taskId}">
-          <label for="step-${step.id}">${step.title}</label>
-          <span class="material-icons step-toggle-arrow" data-step-id="${step.id}">keyboard_arrow_down</span>
+          <label for="step-${step.id}" ${labelClass}>${step.title}</label>
           <div class="step-actions" style="display:none;" data-step-id="${step.id}" data-task-id="${taskId}">
             <!-- Sub-actions will be populated here -->
+            <!-- Note: Actions are currently not shown as toggle arrow is removed.
+                 If actions are still needed, a new UI element to trigger them would be required.
+                 For now, assuming removal of arrow also means actions are not accessible via this UI. -->
           </div>
         `;
         stepsListUl.appendChild(li);
@@ -695,15 +702,70 @@ class CheckMateApp {
         <div class="task-meta">
           <span>${task.time}</span>
           <span>${task.project}</span>
+          ${task.type === 'multi-step' && task.steps && task.steps.length > 0 ? `
+            <span class="task-step-info">${this.getStepInfo(task.steps)}</span>
+          ` : ''}
         </div>
         ${task.type === 'multi-step' ? `
-          <div class="progress-bar-container">
-            <div class="progress-bar-fill" style="width: ${task.progress * 100}%;"></div>
+          <div class="task-progress-section">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: ${task.progress * 100}%;"></div>
+            </div>
+            ${task.steps && task.steps.length > 0 ? `
+              <span class="completed-steps-count">${task.steps.filter(s => s.completed).length}/${task.steps.length}</span>
+            ` : ''}
           </div>
           <a href="#" class="view-steps-link" data-task-id="${task.id}">View Steps</a>
         ` : ''}
       </div>
     `).join('');
+  }
+
+  getStepInfo(steps) {
+    const completedSteps = steps.filter(step => step.completed).length;
+    const totalSteps = steps.length;
+
+    if (totalSteps === 0) {
+      return '';
+    }
+
+    if (completedSteps === totalSteps) {
+      return 'All steps completed';
+    }
+
+    const currentStep = completedSteps + 1;
+    if (totalSteps === 1) {
+      return `Step ${currentStep}`;
+    } else {
+      // Find the next uncompleted step
+      let firstUncompletedStepIndex = -1;
+      for(let i=0; i<steps.length; i++) {
+        if(!steps[i].completed) {
+          firstUncompletedStepIndex = i;
+          break;
+        }
+      }
+
+      if (firstUncompletedStepIndex !== -1) {
+        // Check for consecutive uncompleted steps
+        let lastConsecutiveUncompletedStepIndex = firstUncompletedStepIndex;
+        for (let i = firstUncompletedStepIndex + 1; i < totalSteps; i++) {
+          if (!steps[i].completed) {
+            lastConsecutiveUncompletedStepIndex = i;
+          } else {
+            break;
+          }
+        }
+        if (firstUncompletedStepIndex === lastConsecutiveUncompletedStepIndex) {
+           return `Step ${firstUncompletedStepIndex + 1}`;
+        } else {
+           return `Step ${firstUncompletedStepIndex + 1}-${lastConsecutiveUncompletedStepIndex + 1}`;
+        }
+      }
+      // This case should ideally not be reached if not all steps are completed,
+      // but as a fallback:
+      return `Step ${currentStep}`;
+    }
   }
 
   getUpcomingTasks() { // Renamed function
@@ -715,7 +777,7 @@ class CheckMateApp {
         project: 'Project 003',
         icon: 'videocam', // Changed from 'engineering'
         iconColor: 'text-green', // Changed from 'text-yellow'
-        secondaryIcon: { name: 'skip_next', color: 'text-yellow' }
+        secondaryIcon: { name: 'skip_next', color: 'text-green' }
       },
       {
         id: 'task2', // Added ID
