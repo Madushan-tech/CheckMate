@@ -174,7 +174,7 @@ body {
    So, padding-top = 2.67rem + 0rem = 2.67rem. Round to 2.7rem.
 */
 .task-countdown-container + .main-content {
-  padding-top: 1rem; /* Original: 2.9rem */
+  padding-top: 0.5rem; /* Reduced from 1rem */
 }
 
 /* Tabs Styling */
@@ -938,7 +938,7 @@ body {
   top: 0px; /* Stick to the top of its scrolling container (.main-content) */
   background-color: var(--primary-bg);
   z-index: 98; /* Below header (100) and countdown (99) */
-  padding-top: 0.75rem;
+  padding-top: 0.25rem; /* Reduced from 0.75rem */
   padding-bottom: 0.75rem;
   /* The .date-filter already has margin-bottom: 1.5rem, which is good space below */
   /* To make it appear full width like the header/countdown: */

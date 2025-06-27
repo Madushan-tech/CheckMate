@@ -285,40 +285,40 @@ class CheckMateApp {
     let activeTaskEndTime = null;
     const today = new Date(); // Use a consistent "today" for all parsing in one cycle
 
-    if (this.currentPage === 'plan') {
-      const planTasks = this.getPlanPageTasksSorted(); // Already sorted by time
-      const now = new Date(); // Current time for comparison
+    // Apply plan page logic globally for countdown
+    const planTasks = this.getPlanPageTasksSorted(); // Already sorted by time
+    const nowTime = new Date(); // Current time for comparison
 
-      let foundTask = null;
+    let foundTask = null;
+    for (const task of planTasks) {
+      const { startDate, endDate } = this.parseTaskDateTime(task.time, today);
+      if (nowTime >= startDate && nowTime < endDate) {
+        foundTask = task;
+        activeTaskEndTime = endDate;
+        break;
+      }
+    }
+
+    if (foundTask) {
+      activeTaskName = foundTask.title;
+    } else {
+      // If no current task from plan, check for the next upcoming task from the plan
+      let nextTaskName = "No current tasks"; // Default if nothing is found
+      let nextTaskStartTime = null;
+
       for (const task of planTasks) {
-        const { startDate, endDate } = this.parseTaskDateTime(task.time, today);
-        if (now >= startDate && now < endDate) {
-          foundTask = task;
-          activeTaskEndTime = endDate;
-          break;
+        const { startDate } = this.parseTaskDateTime(task.time, today);
+        if (startDate > nowTime) { // Found the next task that hasn't started yet
+          if (!nextTaskStartTime || startDate < nextTaskStartTime) { // If it's earlier than previously found next task
+            nextTaskStartTime = startDate;
+            // Displaying "Next: Task Name (starts in X)" might be too complex for direct countdown display.
+            // For now, let's keep it simple. If no *current* task, the countdown will show "No schedule".
+            // The task name will be "No current tasks".
+          }
         }
       }
-
-      if (foundTask) {
-        activeTaskName = foundTask.title;
-      } else {
-        activeTaskName = "No current task from plan";
-        // Optional: Find next task and show "Next: ..." or similar
-      }
-    } else {
-      // --- Default Placeholder Task Logic (for non-plan pages) ---
-      // Restore original placeholder logic more closely
-      let placeholderTaskName = "Learning Python Programming Language"; // Default
-      let placeholderEndTime = new Date(today);
-      placeholderEndTime.setHours(10, 0, 0, 0); // Default: Today 10:00 AM
-
-      if (new Date() > placeholderEndTime) { // If current time is past 10 AM today
-        placeholderTaskName = "Project Scoping Meeting"; // Default "next" task
-        placeholderEndTime.setDate(placeholderEndTime.getDate() + 1); // Tomorrow
-        placeholderEndTime.setHours(11, 30, 0, 0); // Tomorrow 11:30 AM
-      }
-      activeTaskName = placeholderTaskName;
-      activeTaskEndTime = placeholderEndTime;
+      activeTaskName = nextTaskName; // Display "No current tasks" or "Next: ..."
+      // activeTaskEndTime remains null, so "No schedule" will be shown by updateCountdown
     }
 
     taskNameElement.textContent = activeTaskName; // Display initial task name
@@ -328,7 +328,7 @@ class CheckMateApp {
 
       if (!activeTaskEndTime) {
         countdownElement.textContent = "No schedule";
-        taskNameElement.textContent = activeTaskName; // Ensure it's updated if it changed
+        taskNameElement.textContent = activeTaskName; // Ensure it's updated (e.g. to "No current tasks")
         return;
       }
 
@@ -336,10 +336,10 @@ class CheckMateApp {
 
       if (distance < 0) {
         countdownElement.textContent = "Ended";
-        taskNameElement.textContent = activeTaskName;
+        taskNameElement.textContent = activeTaskName; // Show the name of the task that just ended
 
-        // If a task just ended on the plan page, try to find the next one after a short delay
-        if (this.currentPage === 'plan' && !this.isReinitializing) {
+        // Universal re-initialization logic to find the next task
+        if (!this.isReinitializing) {
             this.isReinitializing = true;
             if (this.countdownInterval) { // Clear current interval before reinitializing
               clearInterval(this.countdownInterval);
