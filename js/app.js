@@ -50,7 +50,8 @@ class CheckMateApp {
         if (target.type === 'checkbox' && target.dataset.stepId) {
           const stepId = target.dataset.stepId;
           const taskId = target.dataset.taskId;
-          const isChecked = target.checked;
+          const isChecked = target.checked; // State of the checkbox AFTER the click
+          console.log(`Checkbox clicked: taskId=${taskId}, stepId=${stepId}, checkbox.checked=${isChecked}`);
           this.updateTaskStepCompletion(taskId, stepId, isChecked);
         }
         // Handle toggle arrow click
@@ -78,25 +79,36 @@ class CheckMateApp {
     if (task && task.steps) {
       const step = task.steps.find(s => s.id === stepId);
       if (step) {
+        console.log(`updateTaskStepCompletion: Found step: ${step.title}, current step.completed: ${step.completed}, received isChecked: ${isChecked}`);
         step.completed = isChecked; // Update data model
-        console.log(`Task ${taskId}, Step ${stepId} completion changed to ${isChecked}`);
+        console.log(`updateTaskStepCompletion: Step ${stepId} (${step.title}) NEW step.completed: ${step.completed}`);
 
         // Update the UI for the specific step item in the modal
         const stepLiElement = document.querySelector(`.step-item[data-step-id="${stepId}"][data-task-id="${taskId}"]`);
         if (stepLiElement) {
           const labelElement = stepLiElement.querySelector(`label[for="step-${stepId}"]`);
           if (labelElement) {
+            console.log(`Label for ${stepId} current classes: ${labelElement.className}`);
             if (isChecked) {
               labelElement.classList.add('task-completed');
+              console.log(`Label for ${stepId} AFTER ADDING task-completed: ${labelElement.className}`);
             } else {
               labelElement.classList.remove('task-completed');
+              console.log(`Label for ${stepId} AFTER REMOVING task-completed: ${labelElement.className}`);
             }
+          } else {
+            console.error(`Label element not found for stepId: ${stepId} in taskId: ${taskId}`);
           }
-          // Ensure checkbox visual state matches, though browser usually handles this
+          // Ensure checkbox visual state matches the data model state
           const checkboxElement = stepLiElement.querySelector(`input[type="checkbox"]`);
           if (checkboxElement) {
-            checkboxElement.checked = isChecked;
+            checkboxElement.checked = step.completed; // Use the model's state
+            console.log(`Checkbox for ${stepId} visual 'checked' property set to: ${checkboxElement.checked}`);
+          } else {
+            console.error(`Checkbox element not found for stepId: ${stepId} in taskId: ${taskId}`);
           }
+        } else {
+          console.error(`stepLiElement not found for stepId: ${stepId} in taskId: ${taskId}`);
         }
 
         // Recalculate progress for the parent task
@@ -807,9 +819,9 @@ class CheckMateApp {
         title: 'Smith Script Write',
         time: '4:00 P.M. - 6:00 P.M.',
         project: 'Project 003',
-        icon: 'skip_next', // Swapped from videocam
+        icon: 'skip_next',
         iconColor: 'text-green',
-        secondaryIcon: { name: 'videocam', color: 'text-yellow' } // Swapped from skip_next, changed color
+        secondaryIcon: { name: 'videocam', color: 'text-green' } // Changed color to text-green
       },
       {
         id: 'task2', // Added ID
@@ -817,7 +829,7 @@ class CheckMateApp {
         time: '7:00 P.M. - 8:00 P.M.',
         project: 'Project 001',
         icon: 'code',
-        iconColor: 'text-gray',
+        iconColor: 'text-green', // Changed from text-gray
         type: 'multi-step', // Added type
         progress: 0.5, // Example progress (50%)
         steps: [ // Added steps

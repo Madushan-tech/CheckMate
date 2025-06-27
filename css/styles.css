@@ -387,14 +387,7 @@ body {
   margin-top: 0; /* Reset margin if it was previously directly under task-meta */
 }
 
-
-.progress-bar-fill {
-  height: 8px;
-  background-color: var(--border-color); /* Darker background for the bar */
-  border-radius: 4px;
-  margin-top: 0.75rem;
-  overflow: hidden;
-}
+/* Removed duplicate .progress-bar-fill, the one below is more complete */
 
 .progress-bar-fill {
   height: 100%;
