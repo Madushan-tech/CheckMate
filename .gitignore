@@ -1,0 +1,128 @@
+# Miscellaneous
+*.class
+*.lock
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# Flutter related
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/ios/Runner/GeneratedPluginRegistrant.*
+/ios/Runner/flutter_assets/
+app.*.symbols
+
+# Android related
+*/android/**/gradle-wrapper.jar
+*/android/.gradle
+*/android/captures/
+*/android/gradlew
+*/android/gradlew.bat
+*/android/local.properties
+*/android/key.properties
+*.iml
+
+# iOS related
+*/ios/**/*.mode1v3
+*/ios/**/*.mode2v3
+*/ios/**/*.moved-aside
+*/ios/**/*.pbxuser
+*/ios/**/*.perspectivev3
+*/ios/**/.generated/
+*/ios/**/.dart_tool/
+*/ios/**/.idea/
+*/ios/**/.vscode/
+*/ios/**/DerivedData/
+*/ios/**/Pods/
+*/ios/**/Runner.xcworkspace/
+*/ios/**/xcuserdata
+*/ios/.bundle
+*/ios/Flutter/ephemeral/
+*/ios/Flutter/Flutter.podspec
+
+# macOS related
+*/macos/**/*.mode1v3
+*/macos/**/*.mode2v3
+*/macos/**/*.moved-aside
+*/macos/**/*.pbxuser
+*/macos/**/*.perspectivev3
+*/macos/**/.generated/
+*/macos/**/.dart_tool/
+*/macos/**/.idea/
+*/macos/**/.vscode/
+*/macos/**/DerivedData/
+*/macos/**/Pods/
+*/macos/**/Runner.xcworkspace/
+*/macos/**/xcuserdata/
+*/macos/Flutter/ephemeral
+
+# Linux related
+*/linux/**/CMakeCache.txt
+*/linux/**/CMakeFiles
+*/linux/**/Makefile
+*/linux/**/cmake_install.cmake
+*/linux/**/compile_commands.json
+*/linux/flutter/ephemeral
+
+# Windows related
+*/windows/**/CMakeCache.txt
+*/windows/**/CMakeFiles
+*/windows/**/Makefile
+*/windows/**/cmake_install.cmake
+*/windows/**/compile_commands.json
+*/windows/flutter/ephemeral
+*/windows/runner/**/Debug/
+*/windows/runner/**/Profile/
+*/windows/runner/**/Release/
+*/windows/runner/**/.vs/
+*/windows/runner/**/ipch/
+*/windows/runner/**/GeneratedFiles/
+*/windows/runner/**/GeneratedSoundbanks/
+*/windows/runner/**/plugins/
+
+# IntelliJ
+.idea/
+*.iml
+modules.xml
+.idea/libraries/
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/render.experimental.xml
+
+# VS Code
+.vscode/
+launch.json
+settings.json
+
+# Documentation
+# doc/api/
+
+# Web
+.dart_tool/build/
+.dart_tool/chrome-device/
+.dart_tool/edge-device/
+
+# Generated code
+*.g.dart
+*.freezed.dart
+
+# Obfuscation
+app.aab.map.txt
+app.apk.map.txt
