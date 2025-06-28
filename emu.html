@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smartphone Emulator</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/emu.css">
 </head>
 <body>
@@ -11,10 +12,25 @@
         <div class="screen">
             <div class="lock-screen">
                 <div class="status-bar">
-                    <span class="time"></span>
-                    <span class="battery">100%</span>
+                    <div class="status-bar-left">
+                        <span class="carrier">EmulatorOS</span>
+                        <span class="time"></span> <!-- Time will be populated by JS -->
+                    </div>
+                    <div class="status-bar-right">
+                        <span class="material-icons">signal_cellular_alt</span>
+                        <span class="material-icons">wifi</span>
+                        <span class="battery-level">100%</span>
+                        <span class="material-icons battery-icon">battery_full</span>
+                    </div>
                 </div>
                 <div class="lock-screen-content">
+                    <div class="main-time-date">
+                        <div class="main-time-wrapper">
+                             <span class="time large-time"></span> <!-- Populated by JS -->
+                             <span class="am-pm"></span> <!-- Populated by JS -->
+                        </div>
+                        <span class="date"></span> <!-- Populated by JS -->
+                    </div>
                     <div class="notifications">
                         <!-- Notifications will be added here by JS -->
                     </div>
@@ -23,11 +39,25 @@
             </div>
             <div class="home-screen">
                 <div class="status-bar">
-                    <span class="time"></span>
-                    <span class="battery">100%</span>
+                    <div class="status-bar-left">
+                        <span class="carrier">EmulatorOS</span>
+                        <span class="time"></span> <!-- Time will be populated by JS -->
+                    </div>
+                    <div class="status-bar-right">
+                        <span class="material-icons">signal_cellular_alt</span>
+                        <span class="material-icons">wifi</span>
+                        <span class="battery-level">100%</span>
+                        <span class="material-icons battery-icon">battery_full</span>
+                    </div>
                 </div>
-                <div class="widget-area">
-                    <span>Widget Area Placeholder</span>
+                <div class="search-bar-container">
+                    <span class="material-icons search-icon">search</span>
+                    <input type="text" class="search-input" placeholder="Search...">
+                    <span class="material-icons mic-icon">mic</span>
+                    <!-- Placeholder for Lens icon (image or another material icon if suitable) -->
+                    <img alt="Lens icon" class="search-bar-img-icon" src="images/lens_placeholder.png"/>
+                    <!-- Placeholder for Apps icon -->
+                    <span class="material-icons apps-icon">apps</span>
                 </div>
                 <div class="app-grid page-0 active">
                     <!-- Apps for home screen -->
@@ -43,9 +73,42 @@
                     <span class="dot" data-page="1"></span>
                 </div>
                 <div class="nav-buttons">
-                    <button class="nav-button nav-back">&#8249;</button> <!-- Placeholder for Back -->
-                    <button class="nav-button nav-home">&#9679;</button> <!-- Placeholder for Home -->
-                    <button class="nav-button nav-recents">&#9634;</button> <!-- Placeholder for Recents -->
+                    <button class="nav-button nav-back material-icons">chevron_left</button>
+                    <button class="nav-button nav-home material-icons">radio_button_unchecked</button>
+                    <button class="nav-button nav-recents material-icons">crop_square</button>
+                </div>
+            </div>
+            <div class="notification-panel hidden">
+                <div class="panel-header">
+                    <!-- Mini status bar / date / settings icon - Will be populated in a later step or can be part of this if simple enough -->
+                    <span class="panel-time-date"></span> <!-- Placeholder for panel time/date -->
+                </div>
+                <div class="quick-settings-area">
+                    <div class="quick-settings-grid">
+                        <button class="quick-setting-tile" data-setting="wifi">
+                            <span class="material-icons">wifi</span>
+                            <span>Wi-Fi</span>
+                        </button>
+                        <button class="quick-setting-tile" data-setting="bluetooth">
+                            <span class="material-icons">bluetooth</span>
+                            <span>Bluetooth</span>
+                        </button>
+                        <button class="quick-setting-tile" data-setting="silent">
+                            <span class="material-icons">volume_off</span>
+                            <span>Silent</span>
+                        </button>
+                        <button class="quick-setting-tile" data-setting="flashlight">
+                            <span class="material-icons">flashlight_on</span>
+                            <span>Flashlight</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="notifications-list">
+                    <!-- Notifications will be listed here -->
+                </div>
+                <div class="panel-footer">
+                    <button class="panel-footer-button manage-notifications">Manage</button>
+                    <button class="panel-footer-button clear-all-notifications">Clear all</button>
                 </div>
             </div>
         </div>

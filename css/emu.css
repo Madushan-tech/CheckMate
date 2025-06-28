@@ -8,6 +8,25 @@ body {
     font-family: sans-serif;
 }
 
+/* General Material Icons styling */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px; /* Default icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
+}
+
 .phone {
     width: 360px;
     height: 740px;
@@ -73,48 +92,144 @@ body {
 .status-bar {
     display: flex;
     justify-content: space-between;
-    padding: 10px 15px;
-    background-color: rgba(0, 0, 0, 0.2); /* Slightly darker for better contrast with white text */
-    color: #fff; /* White text for home screen as well now */
-    position: relative; /* Ensure it stays on top */
-    z-index: 10; /* Make sure it's above other content */
-}
-
-.lock-screen .status-bar {
-    /* color: #fff; // Already white due to general .status-bar rule */
-    /* background-color is inherited or can be made more transparent if needed */
-    background-color: rgba(0,0,0,0.1); /* Can be slightly different if desired for lock screen */
+    align-items: center;
+    padding: 8px 12px; /* Adjusted padding */
+    background-color: rgba(0, 0, 0, 0.3); /* Consistent with designs */
+    color: #fff;
     position: relative;
-    z-index: 1; /* z-index within lock-screen context */
+    z-index: 10;
+    height: 40px; /* Explicit height */
+    box-sizing: border-box;
 }
 
-.widget-area {
-    width: calc(100% - 40px); /* Match app grid padding */
-    margin: 0 auto; /* Center it */
-    padding: 10px;
-    height: 100px; /* Example height */
-    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
-    border-radius: 12px;
-    margin-top: 10px; /* Space from status bar */
-    margin-bottom: 10px; /* Space to app grid */
-    box-sizing: border-box;
+.status-bar-left, .status-bar-right {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-style: italic;
+    gap: 6px; /* Spacing between items */
+}
+
+.status-bar-left .carrier {
+    font-size: 0.8em;
+    margin-right: 8px; /* Space between carrier and time */
+}
+
+.status-bar .time {
+    font-size: 0.8em; /* Smaller time in status bar */
+    font-weight: 500;
+}
+
+.status-bar-right .material-icons {
+    font-size: 18px; /* Icon size in status bar */
+}
+
+.status-bar-right .battery-level {
+    font-size: 0.75em;
+    margin-right: -2px; /* Snuggle percentage closer to icon */
+}
+
+/* No need for .lock-screen .status-bar specific styles if they are now identical */
+
+.search-bar-container {
+    background-color: white;
+    border-radius: 28px; /* Fully rounded for pill shape */
+    padding: 10px 16px;
+    margin: 10px 16px; /* Matches home screen design margin */
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    color: #555; /* Default text/icon color inside search bar */
+    height: 48px; /* Explicit height like design */
+    box-sizing: border-box;
+}
+
+.search-bar-container .search-icon {
+    margin-right: 10px;
+    font-size: 22px;
+    color: #777;
+}
+
+.search-bar-container .search-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em; /* Slightly larger than 0.9em */
+    color: #333;
+}
+
+.search-bar-container .search-input::placeholder {
+    color: #999;
+}
+
+.search-bar-container .mic-icon {
+    margin-left: 10px;
+    margin-right: 8px;
+    font-size: 22px;
+    color: #4285F4; /* Google blue for mic */
+    cursor: pointer;
+}
+.search-bar-container .search-bar-img-icon {
+    width: 22px; /* Slightly larger to match icon font size */
+    height: 22px;
+    border-radius: 50%; /* If it's meant to be circular */
+    margin-left: 8px;
+    margin-right: 8px;
+    cursor: pointer;
+    object-fit: cover; /* Ensure image covers if not perfectly square */
+}
+
+.search-bar-container .apps-icon {
+    margin-left: 8px;
+    font-size: 22px;
+    color: #777;
+    cursor: pointer;
 }
 
 .lock-screen-content {
     flex-grow: 1;
     display: flex;
-    flex-direction: column; /* Stack notifications and swipe text */
-    justify-content: space-between; /* Push swipe text to bottom */
+    flex-direction: column;
+    /* justify-content: center; Vertically center items overall */
     align-items: center;
     text-align: center;
     padding: 20px;
     box-sizing: border-box;
+    text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.7); /* From your design */
 }
+
+.main-time-date {
+    padding-top: 40px; /* Similar to your design's padding-top: 60px, adjusted a bit */
+    margin-bottom: auto; /* Pushes this up, and swipe text down */
+}
+
+.main-time-wrapper {
+    display: flex;
+    align-items: baseline; /* Align time and AM/PM */
+}
+
+.time.large-time { /* Targeting the big lock screen time */
+    font-size: 6rem; /* From your design */
+    font-weight: 300; /* From your design */
+    line-height: 1; /* From your design */
+    color: #fff;
+}
+
+.am-pm {
+    font-size: 1.5rem; /* From your design */
+    font-weight: 300; /* From your design */
+    margin-left: 8px; /* From your design */
+    color: #fff;
+    align-self: flex-end; /* From your design's time-pm */
+    padding-bottom: 12px; /* Adjusted from your design */
+}
+
+.date {
+    font-size: 1.25rem; /* From your design */
+    font-weight: 400; /* From your design */
+    margin-top: 4px; /* From your design */
+    color: #fff;
+}
+
 
 .notifications {
     width: 100%;
@@ -170,23 +285,54 @@ body {
 
 
 .app {
-    background-color: #fff;
-    border-radius: 10px;
+    /* background-color: #fff; Removed, individual icon backgrounds will handle this or be transparent */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Align icon to top, label follows */
     align-items: center;
     text-align: center;
-    font-size: 12px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: #fff; /* App labels are white */
+    font-size: 12px; /* Label font size */
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); Removed, shadow on icon itself if needed */
 }
 
 .app .icon {
-    width: 40px;
-    height: 40px;
-    background-color: #ddd;
-    border-radius: 5px;
-    margin-bottom: 5px;
+    width: 56px; /* From design */
+    height: 56px; /* From design */
+    background-color: rgba(255, 255, 255, 0.2); /* Default semi-transparent background for icons */
+    border-radius: 50%; /* Circular */
+    margin-bottom: 8px; /* From design */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* From design */
+    font-size: 28px; /* For emoji/text icons if used */
+    color: #fff; /* Default color for text/emoji icons */
+}
+
+.app .app-label { /* Explicit class for label if needed, but direct child span works too */
+    margin-top: 4px; /* From design, though margin-bottom on icon provides spacing */
+    /* font-size is inherited from .app */
+    line-height: 1.2;
+    /* Ensure label text is white, if not already from .app */
+    color: #fff;
+}
+
+/* Specific styling for icons within the dock to match design */
+.dock .app .icon {
+    background-color: white; /* From design's .dock-item */
+    width: 64px; /* From design's .dock-item */
+    height: 64px; /* From design's .dock-item */
+    border-radius: 50%; /* Ensure circular */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* From design's .dock-item */
+    color: #333; /* Default icon color on white background */
+    font-size: 30px; /* Adjust icon size for larger dock items */
+}
+
+/* Ensure app name under dock icons is white and visible */
+.dock .app span:not(.icon) { /* Target the text label */
+    color: white;
+    font-size: 11px; /* Slightly smaller if needed */
 }
 
 
@@ -194,22 +340,30 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-    position: absolute; /* Position above nav-buttons */
-    bottom: 80px;      /* nav-buttons height (50px) + page-indicator height (approx 30px) */
+    padding: 16px 16px; /* Top/sides padding from design */
+    /* padding-bottom will be adjusted to make space for nav-bar */
+    background-color: rgba(0,0,0,0.3); /* From design */
+    backdrop-filter: blur(10px); /* From design */
+    -webkit-backdrop-filter: blur(10px); /* For Safari */
+    border-top-left-radius: 20px; /* From design */
+    border-top-right-radius: 20px; /* From design */
+    position: absolute;
+    bottom: 50px;      /* Height of .nav-buttons */
     left: 0;
     right: 0;
-    z-index: 4; /* Below nav-buttons' items if they had dropdowns, but above app-grid */
+    z-index: 4;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Optional: subtle shadow for separation */
+    height: 110px; /* Approximate height: 64px icon + ~15px label + 16px pad-top + 16px pad-bottom */
+    box-sizing: border-box;
 }
 
 .page-indicator {
-    display: flex;
+    display: none; /* Hidden for now as per new home screen design */
+    /* display: flex; */
     justify-content: center;
     padding: 10px;
-    position: absolute; /* Position above nav-buttons */
-    bottom: 50px;      /* nav-buttons height */
+    position: absolute;
+    bottom: 50px;
     left: 0;
     right: 0;
     z-index: 4;
@@ -278,10 +432,11 @@ body {
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     position: absolute; /* Needed for transform */
     width: calc(100% - 40px); /* Adjust for padding */
-    /* status bar (approx 40px) + widget area (100px + 20px margins) + dock + page indicator + nav buttons (50px) */
-    height: calc(100% - 40px - 120px - 70px - 30px - 50px); /* Recalculated height */
+    /* Top elements: status bar (40px) + search bar (48px + 10+10 margins = 68px) = 108px */
+    /* Bottom elements: nav-buttons (50px) + dock (110px) = 160px */
+    height: calc(100% - 108px - 160px);
     left: 20px; /* Adjust for padding */
-    top: calc(40px + 120px); /* Status bar height + widget area height and margins */
+    top: 108px; /* Status bar height + search bar (with margins) */
     box-sizing: border-box; /* Ensure padding is included in height calculation */
 }
 
@@ -368,4 +523,195 @@ body {
 
 .popup-close-button:hover {
     background-color: #0056b3;
+}
+
+/* Notification Panel Styles */
+.notification-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Or a max-height if it shouldn't always be full screen */
+    background-color: rgba(20, 20, 30, 0.95); /* Dark, slightly transparent - adjust as needed */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 900; /* Below popups (1000) but above most other screen content */
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    padding: 10px; /* General padding for the panel */
+    box-sizing: border-box;
+    gap: 10px; /* Gap between panel sections */
+}
+
+.notification-panel.open {
+    transform: translateY(0%);
+}
+
+.panel-header {
+    padding: 5px 10px; /* Padding for header content */
+    text-align: left; /* Example alignment */
+    font-size: 0.9em;
+    color: #ccc;
+    /* border-bottom: 1px solid rgba(255,255,255,0.1); */ /* Optional separator */
+    margin-bottom: 5px; /* Space below header */
+}
+
+.quick-settings-area {
+    padding: 10px 0; /* Padding around the grid */
+}
+
+.quick-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 grid */
+    gap: 10px; /* Gap between tiles */
+}
+
+.quick-setting-tile {
+    background-color: rgba(255, 255, 255, 0.15); /* Default 'on' state from design (gray-700 like) */
+    color: #fff;
+    border: none;
+    border-radius: 18px; /* From design (rounded-3xl in Tailwind is often ~1rem or more) */
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    min-height: 80px; /* Ensure tiles have some height */
+}
+
+.quick-setting-tile .material-icons {
+    font-size: 28px; /* Icon size in tile */
+    margin-bottom: 6px;
+}
+
+.quick-setting-tile span:not(.material-icons) {
+    font-size: 0.8em; /* Text label size */
+}
+
+/* General 'OFF' state for most toggles (Wi-Fi, BT, Flashlight) */
+.quick-setting-tile.off {
+    background-color: rgba(55, 65, 81, 0.7); /* Darker, less prominent (like Tailwind gray-700/800) */
+    opacity: 0.8;
+}
+
+/* Specific styling for the 'Silent' toggle based on its state */
+.quick-setting-tile[data-setting="silent"] {
+    /* Default (which means 'Active' or 'Sound ON' for this toggle) */
+    background-color: rgba(96, 102, 112, 0.7); /* Standard active color */
+    color: #fff;
+}
+.quick-setting-tile[data-setting="silent"] .material-icons {
+    color: #fff;
+}
+
+.quick-setting-tile[data-setting="silent"].inactive { /* 'Silent ON' (volume_off) */
+    background-color: rgba(229, 231, 235, 0.8); /* Light background (gray-200) */
+    color: #333; /* Dark text */
+}
+.quick-setting-tile[data-setting="silent"].inactive .material-icons {
+    color: #555; /* Darker icon color */
+}
+
+/* Remove generic .active class if not used universally */
+/* .quick-setting-tile.active { ... } */
+
+
+.panel-header, .quick-settings-area, .notifications-list, .panel-footer {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.notifications-list {
+    flex-grow: 1; /* Takes up available space */
+    overflow-y: auto; /* For scrolling notifications */
+    padding: 5px 0; /* Padding around the list itself */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between notifications */
+}
+
+.notification-item { /* Style for individual notifications in the panel */
+    background-color: rgba(75, 85, 99, 0.7); /* Tailwind gray-600 like, semi-transparent */
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start; /* Align icon with top of text block */
+    gap: 12px;
+}
+
+.notification-item .app-icon-sm { /* Smaller icon for notification */
+    font-size: 20px; /* Material icon size */
+    color: #fb923c; /* Orange-400 like for phone_missed example */
+    /* Add width/height if using img tags for icons here */
+    margin-top: 2px; /* Align better with text */
+}
+
+.notification-item-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notification-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75em;
+    color: #cbd5e1; /* Tailwind slate-300 like */
+}
+.notification-item-header .app-name-time .app-name {
+    font-weight: 500;
+}
+.notification-item-header .app-name-time .time-since {
+    margin-left: 5px;
+}
+
+
+.notification-item-title {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #fff;
+}
+
+.notification-item-text {
+    font-size: 0.85em;
+    color: #e2e8f0; /* Tailwind slate-200 like */
+    line-height: 1.4;
+}
+
+.notification-item .expand-icon {
+    font-size: 20px;
+    color: #94a3b8; /* Tailwind slate-400 like */
+    align-self: center; /* Center it vertically in the notification item */
+}
+
+
+.panel-footer {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between; /* As per design, or space-around */
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.1); /* Optional separator */
+    margin-top: 5px; /* Space above footer */
+}
+
+.panel-footer-button {
+    background-color: rgba(96, 102, 112, 0.7); /* Tailwind gray-700 like */
+    color: #fff;
+    border: none;
+    border-radius: 9999px; /* Pill shape */
+    padding: 8px 16px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.panel-footer-button:hover {
+    background-color: rgba(75, 85, 99, 0.9); /* Darker gray */
 }

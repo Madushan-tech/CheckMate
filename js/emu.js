@@ -3,13 +3,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const lockScreen = document.querySelector('.lock-screen');
     const homeScreen = document.querySelector('.home-screen');
     const powerButton = document.querySelector('.power-button');
-    const timeElements = document.querySelectorAll('.time');
+    const statusBarTimeElements = document.querySelectorAll('.status-bar .time');
+    const lockScreenLargeTimeElement = document.querySelector('.lock-screen-content .large-time');
+    const lockScreenAmPmElement = document.querySelector('.lock-screen-content .am-pm');
+    const lockScreenDateElement = document.querySelector('.lock-screen-content .date');
     const notificationsContainer = lockScreen.querySelector('.notifications');
     const appPages = document.querySelectorAll('.app-grid');
     const pageDots = document.querySelectorAll('.page-indicator .dot');
     const navHomeButton = document.querySelector('.nav-home');
     // const navBackButton = document.querySelector('.nav-back'); // For future use
     // const navRecentsButton = document.querySelector('.nav-recents'); // For future use
+    const notificationPanel = document.querySelector('.notification-panel');
+    const mainStatusBarElements = document.querySelectorAll('.status-bar'); // All status bars
+    const quickSettingTiles = document.querySelectorAll('.quick-setting-tile');
+    const panelTimeDateElement = document.querySelector('.panel-time-date');
+    const panelNotificationsList = notificationPanel ? notificationPanel.querySelector('.notifications-list') : null;
+    const clearAllButton = notificationPanel ? notificationPanel.querySelector('.clear-all-notifications') : null;
 
 
     let isScreenOn = true; // Default: Screen is ON
@@ -24,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
             phoneScreen.style.backgroundColor = '#000'; // Set screen to black
             lockScreen.classList.add('hidden');
             homeScreen.classList.remove('active'); // Ensure home screen is also hidden
+            if (notificationPanel && notificationPanel.classList.contains('open')) {
+                closeNotificationPanel(); // Close panel if it's open when screen turns off
+            }
         } else {
             // Screen is currently OFF, so turn it ON to the lock screen
             isScreenOn = true;
@@ -33,24 +45,51 @@ document.addEventListener('DOMContentLoaded', () => {
             lockScreen.classList.remove('hidden');
             homeScreen.classList.remove('active'); // Ensure home screen is not shown
 
-            displayWelcomeNotification(); // Show notifications on lock screen
+            // displayWelcomeNotification(); // Welcome notification now shown when panel opens
             updateTime(); // Ensure time is current
         }
     });
 
-    // --- Notification Display ---
-    function displayWelcomeNotification() {
-        notificationsContainer.innerHTML = ''; // Clear existing notifications
+    // --- Notification Display in Panel ---
+    function displayWelcomeNotification() { // This will now add to the panel list
+        if (!panelNotificationsList) return;
 
-        const notificationHTML = `
-            <div class="notification">
-                <div class="app-name">CheckMate App</div>
-                <div class="title">Welcome to CheckMate</div>
-                <div class="text">Thank you for choosing CheckMate! Explore its features.</div>
+        // Clear old lock screen notifications if any (or stop populating them)
+        if (notificationsContainer) notificationsContainer.innerHTML = '';
+
+        // Example notification data (can be made more generic)
+        const notificationData = {
+            appIcon: 'phone_missed', // Material icon name
+            iconColor: '#fb923c', // Orange-400 like
+            appName: 'Phone',
+            timeSince: '2m', // Placeholder
+            title: '071 547 9078',
+            text: 'Missed call • On Silent mode',
+            expandIcon: 'expand_more'
+        };
+
+        addNotificationToPanel(notificationData);
+    }
+
+    function addNotificationToPanel(data) {
+        if (!panelNotificationsList) return;
+
+        const item = document.createElement('div');
+        item.classList.add('notification-item');
+        item.innerHTML = `
+            <span class="material-icons app-icon-sm" style="color: ${data.iconColor || '#fff'};">${data.appIcon}</span>
+            <div class="notification-item-content">
+                <div class="notification-item-header">
+                    <span class="app-name-time">
+                        <span class="app-name">${data.appName}</span> • <span class="time-since">${data.timeSince}</span>
+                    </span>
+                </div>
+                <div class="notification-item-title">${data.title}</div>
+                <div class="notification-item-text">${data.text}</div>
             </div>
+            <span class="material-icons expand-icon">${data.expandIcon}</span>
         `;
-        // For now, just one notification. Could be expanded to an array.
-        notificationsContainer.innerHTML = notificationHTML;
+        panelNotificationsList.prepend(item); // Add new notifications to the top
     }
 
     // --- Time Display ---
@@ -74,12 +113,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let hours = targetDate.getUTCHours();
         const minutes = targetDate.getUTCMinutes().toString().padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        const formattedTime = `${hours}:${minutes} ${ampm}`;
+        const currentAmPm = targetDate.getUTCHours() >= 12 ? 'PM' : 'AM';
+        let currentHours = targetDate.getUTCHours() % 12;
+        currentHours = currentHours ? currentHours : 12; // the hour '0' should be '12'
 
-        timeElements.forEach(el => el.textContent = formattedTime);
+        // Status bar time format (e.g., "4:14 PM")
+        const statusBarFormattedTime = `${currentHours}:${minutes} ${currentAmPm}`;
+        statusBarTimeElements.forEach(el => el.textContent = statusBarFormattedTime);
+
+        // Large lock screen time format (e.g., "4:14")
+        if (lockScreenLargeTimeElement) {
+            lockScreenLargeTimeElement.textContent = `${currentHours}:${minutes}`;
+        }
+        if (lockScreenAmPmElement) {
+            lockScreenAmPmElement.textContent = currentAmPm;
+        }
+
+        // Date format (e.g., "Sat, Jun 28")
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const dayName = days[targetDate.getUTCDay()];
+        const monthName = months[targetDate.getUTCMonth()];
+        const dayOfMonth = targetDate.getUTCDate();
+        const formattedDate = `${dayName}, ${monthName} ${dayOfMonth}`;
+
+        if (lockScreenDateElement) {
+            lockScreenDateElement.textContent = formattedDate;
+        }
+
+        // Update time in notification panel header
+        if (panelTimeDateElement && notificationPanel && notificationPanel.classList.contains('open')) {
+            // Format: 4:15 PM 06/28/2025 (from design)
+            const panelDateStr = `${(targetDate.getUTCMonth() + 1).toString().padStart(2, '0')}/${dayOfMonth.toString().padStart(2, '0')}/${targetDate.getUTCFullYear()}`;
+            panelTimeDateElement.textContent = `${statusBarFormattedTime} ${panelDateStr}`;
+        }
     }
     setInterval(updateTime, 1000); // Update time every second
 
@@ -213,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLocked) {
             lockScreen.classList.remove('hidden');
             homeScreen.classList.remove('active');
-            displayWelcomeNotification();
+            // displayWelcomeNotification(); // Welcome notification now shown when panel opens
         } else {
             // This case should ideally not happen on initial load if isLocked is true by default
             lockScreen.classList.add('hidden');
@@ -264,4 +331,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Example Usage (can be removed or called from elsewhere):
     // setTimeout(() => showPopup("Test Popup", "This is a test of the popup system."), 5000); // Shows after 5 seconds
+
+    // --- Notification Panel Toggle ---
+    let welcomeNotificationShown = false; // Track if initial welcome is shown
+
+    function openNotificationPanel() {
+        if (notificationPanel) {
+            notificationPanel.classList.add('open');
+            if (!welcomeNotificationShown && panelNotificationsList.children.length === 0) {
+                // Show welcome notification only once, or if list is empty
+                displayWelcomeNotification(); // Now populates the panel
+                welcomeNotificationShown = true;
+            }
+        }
+    }
+
+    function closeNotificationPanel() {
+        if (notificationPanel) {
+            notificationPanel.classList.remove('open');
+        }
+    }
+
+    function toggleNotificationPanel() {
+        if (notificationPanel) {
+            notificationPanel.classList.toggle('open');
+        }
+    }
+
+    // Temporary trigger: Click on any status bar to toggle panel
+    mainStatusBarElements.forEach(bar => {
+        bar.addEventListener('click', (event) => {
+            // Prevent clicks on status bar content (like time or icons) from toggling if not desired
+            // For now, any click on status bar will toggle.
+            if (isScreenOn) { // Only allow opening if screen is on
+                 toggleNotificationPanel();
+            }
+        });
+    });
+
+    // Close panel if home button is pressed and panel is open
+    navHomeButton.addEventListener('click', () => {
+        if (notificationPanel && notificationPanel.classList.contains('open')) {
+            closeNotificationPanel();
+        }
+        // Existing home button functionality (showPage(0)) will still run
+    });
+
+
+    // Redundant power click listener removed, integrated above.
+
+    // --- Quick Settings Toggle Logic ---
+    const quickSettingsStates = {
+        wifi: true, // Default to on
+        bluetooth: true, // Default to on
+        silent: false, // Default to off
+        flashlight: false // Default to off
+    };
+
+    function updateQuickSettingTileUI(tile, settingName) {
+        const iconElement = tile.querySelector('.material-icons');
+        const isSilentToggle = settingName === 'silent';
+        const isCurrentlyOn = quickSettingsStates[settingName];
+
+        if (isSilentToggle) {
+            // For Silent: state true means Silent is ON (inactive style, volume_off)
+            // state false means Silent is OFF (active style, volume_up)
+            if (isCurrentlyOn) { // Silent mode is ON
+                tile.classList.add('inactive');
+                iconElement.textContent = 'volume_off';
+            } else { // Silent mode is OFF (sound is on)
+                tile.classList.remove('inactive');
+                iconElement.textContent = 'volume_up';
+            }
+        } else {
+            // For Wi-Fi, Bluetooth, Flashlight: state true means feature is ON (no .off class)
+            // state false means feature is OFF (.off class)
+            if (isCurrentlyOn) {
+                tile.classList.remove('off');
+            } else {
+                tile.classList.add('off');
+            }
+        }
+    }
+
+    quickSettingTiles.forEach(tile => {
+        const settingName = tile.dataset.setting;
+        updateQuickSettingTileUI(tile, settingName); // Initialize UI based on default states
+
+        tile.addEventListener('click', () => {
+            quickSettingsStates[settingName] = !quickSettingsStates[settingName];
+            updateQuickSettingTileUI(tile, settingName);
+            // In a real scenario, this would also trigger actual functionality
+        });
+    });
+
+    if (clearAllButton && panelNotificationsList) {
+        clearAllButton.addEventListener('click', () => {
+            panelNotificationsList.innerHTML = ''; // Clear all notifications from the panel
+            // Optionally, reset welcomeNotificationShown if you want it to reappear next time panel opens and list is empty
+            // welcomeNotificationShown = false;
+        });
+    }
+
 });
