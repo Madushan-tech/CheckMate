@@ -12,30 +12,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // const navRecentsButton = document.querySelector('.nav-recents'); // For future use
 
 
-    let isScreenOn = false;
-    let isLocked = true;
+    let isScreenOn = true; // Default: Screen is ON
+    let isLocked = true;   // Default: Phone is LOCKED
     let currentPage = 0;
 
     // --- Power Button Functionality ---
     powerButton.addEventListener('click', () => {
-        isScreenOn = !isScreenOn;
         if (isScreenOn) {
-            phoneScreen.style.backgroundColor = isLocked ? 'transparent' : '#eee'; // Lock screen uses its own bg
-            if (isLocked) {
-                lockScreen.classList.remove('hidden');
-                homeScreen.classList.remove('active');
-                displayWelcomeNotification();
-            } else {
-                lockScreen.classList.add('hidden');
-                homeScreen.classList.add('active');
-                showPage(currentPage);
-            }
-        } else {
-            phoneScreen.style.backgroundColor = '#000'; // Screen off
+            // Screen is currently ON (either lock or home), so turn it OFF
+            isScreenOn = false;
+            phoneScreen.style.backgroundColor = '#000'; // Set screen to black
             lockScreen.classList.add('hidden');
-            homeScreen.classList.remove('active');
+            homeScreen.classList.remove('active'); // Ensure home screen is also hidden
+        } else {
+            // Screen is currently OFF, so turn it ON to the lock screen
+            isScreenOn = true;
+            isLocked = true; // Always go to lock screen when turning "on" with power button
+
+            phoneScreen.style.backgroundColor = 'transparent'; // Lock screen has its own background
+            lockScreen.classList.remove('hidden');
+            homeScreen.classList.remove('active'); // Ensure home screen is not shown
+
+            displayWelcomeNotification(); // Show notifications on lock screen
+            updateTime(); // Ensure time is current
         }
-        updateTime(); // Update time when screen turns on
     });
 
     // --- Notification Display ---
@@ -55,9 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Time Display ---
     function updateTime() {
-        // Update time if the screen is on OR if the lock screen is currently visible
-        const lockScreenVisible = !lockScreen.classList.contains('hidden');
-        if (!isScreenOn && !lockScreenVisible) {
+        // Only update time if the screen is conceptually "on".
+        // The actual visibility of time elements depends on whether lock screen or home screen is active.
+        if (!isScreenOn) {
+            // If screen is off, don't bother calculating time.
+            // Exception: if power button was just pressed to turn screen off,
+            // this function might be called once more before visual elements are hidden.
+            // This is generally fine.
             return;
         }
 
@@ -105,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isLocked = false;
         lockScreen.classList.add('hidden');
         homeScreen.classList.add('active');
-        phoneScreen.style.backgroundColor = '#eee'; // Home screen background
+        phoneScreen.style.backgroundColor = 'transparent'; // Home screen also uses its own background image
         showPage(currentPage);
         updateTime(); // Ensure time is updated on home screen
     }
@@ -202,18 +206,24 @@ document.addEventListener('DOMContentLoaded', () => {
     sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
     dockApps.forEach(app => dock.appendChild(createAppElement(app)));
 
-    // Initial setup
-    if (isScreenOn) {
+    // Initial setup: Phone starts ON and LOCKED
+    function initializeEmulatorView() {
+        phoneScreen.style.backgroundColor = 'transparent'; // Lock screen (or home screen) provides its own background
+
         if (isLocked) {
             lockScreen.classList.remove('hidden');
-            displayWelcomeNotification(); // Ensure notification shows if starting locked and on
+            homeScreen.classList.remove('active');
+            displayWelcomeNotification();
         } else {
+            // This case should ideally not happen on initial load if isLocked is true by default
+            lockScreen.classList.add('hidden');
             homeScreen.classList.add('active');
-            showPage(0); // Show first page
+            showPage(currentPage); // Show current page (should be 0)
         }
-    } else {
-        phoneScreen.style.backgroundColor = '#000'; // Screen off
+        updateTime(); // Update time immediately
     }
+
+    initializeEmulatorView(); // Call the function to set up the view
 
     // --- Navigation Button Event Listeners ---
     navHomeButton.addEventListener('click', () => {
@@ -227,4 +237,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // navRecentsButton.addEventListener('click', () => { ... });
 
     updateTime(); // Initial time update
+
+    // --- Pop-up Functionality ---
+    const popupOverlay = document.querySelector('.popup-overlay');
+    const popupTitleElem = document.querySelector('.popup-title');
+    const popupMessageElem = document.querySelector('.popup-message');
+    const popupCloseButton = document.querySelector('.popup-close-button');
+
+    function showPopup(title, message) {
+        popupTitleElem.textContent = title;
+        popupMessageElem.textContent = message;
+        popupOverlay.classList.remove('hidden');
+    }
+
+    function hidePopup() {
+        popupOverlay.classList.add('hidden');
+    }
+
+    popupCloseButton.addEventListener('click', hidePopup);
+    // Clicking on the overlay itself can also close the popup (optional)
+    popupOverlay.addEventListener('click', (event) => {
+        if (event.target === popupOverlay) { // Ensure click is on overlay, not on popup content
+            hidePopup();
+        }
+    });
+
+    // Example Usage (can be removed or called from elsewhere):
+    // setTimeout(() => showPopup("Test Popup", "This is a test of the popup system."), 5000); // Shows after 5 seconds
 });
