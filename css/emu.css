@@ -42,8 +42,9 @@ body {
 }
 
 .lock-screen {
-    /* Night sky gradient wallpaper */
-    background: linear-gradient(to bottom, #000033, #000066, #1a1a8c);
+    background-image: url('../images/dark_wallpaper.jpg');
+    background-size: cover;
+    background-position: center;
     color: #fff;
     z-index: 10; /* Ensure lock screen is on top */
     display: flex; /* Ensure it's flex for content alignment */
@@ -55,8 +56,9 @@ body {
 }
 
 .home-screen {
-    /* Similar night sky gradient wallpaper to lock screen */
-    background: linear-gradient(to bottom, #000033, #000066, #1a1a8c);
+    background-image: url('../images/dark_wallpaper.jpg');
+    background-size: cover;
+    background-position: center;
     /* Fallback for older browsers, though gradient is widely supported */
     /* background-color: #000033; */
     display: none; /* Initially hidden */
