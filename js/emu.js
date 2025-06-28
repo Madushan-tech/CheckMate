@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelNotificationsList = notificationPanel ? notificationPanel.querySelector('.notifications-list') : null;
     const clearAllButton = notificationPanel ? notificationPanel.querySelector('.clear-all-notifications') : null;
     const fingerprintSensor = document.querySelector('.fingerprint-icon');
-    const panelSwipeHandle = document.querySelector('.panel-swipe-handle');
-    const panelSwipeIcon = document.querySelector('.panel-swipe-icon');
+    const panelToggleButton = document.querySelector('.nav-panel-toggle'); // New selector for the V-arrow button
+    // panelSwipeIcon is now the same as panelToggleButton, as the button's textContent is the icon.
 
 
     let isScreenOn = false; // Default: Screen is OFF
@@ -363,31 +363,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggleNotificationPanel() {
-        if (notificationPanel && panelSwipeIcon) {
+        if (notificationPanel && panelToggleButton) { // Check panelToggleButton
             notificationPanel.classList.toggle('open');
             if (notificationPanel.classList.contains('open')) {
-                panelSwipeIcon.textContent = 'keyboard_arrow_down';
-                openNotificationPanel(); // Call the function that handles showing welcome notification
+                panelToggleButton.textContent = 'keyboard_arrow_down'; // Change button's icon
+                openNotificationPanel();
             } else {
-                panelSwipeIcon.textContent = 'keyboard_arrow_up';
-                // closeNotificationPanel() is implicitly handled by removing .open,
-                // but if openNotificationPanel has specific logic, ensure close does too if needed.
+                panelToggleButton.textContent = 'keyboard_arrow_up'; // Change button's icon
             }
         }
     }
 
-    // Temporary trigger: Click on any status bar to toggle panel - REMOVED
-    // mainStatusBarElements.forEach(bar => {
-    //     bar.addEventListener('click', (event) => {
-    //         if (isScreenOn) {
-    //              toggleNotificationPanel();
-    //         }
-    //     });
-    // });
+    // REMOVED: Old status bar click listener
+    // REMOVED: Old panelSwipeHandle listener
 
-    if (panelSwipeHandle) {
-        panelSwipeHandle.addEventListener('click', () => {
-            if (isScreenOn) { // Only allow toggling if screen is on
+    if (panelToggleButton) { // New listener for the button in nav-bar
+        panelToggleButton.addEventListener('click', () => {
+            if (isScreenOn) {
                 toggleNotificationPanel();
             }
         });
