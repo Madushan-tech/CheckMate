@@ -204,12 +204,44 @@ class CheckMateApp {
   }
 
   updateTaskStepCompletion(taskId, stepId, isChecked) {
-    // Find the task and step in your data structure and update it
-    // For now, this is a placeholder. In a real app, update state and potentially re-render.
-    const task = this.getUpcomingTasks().find(t => t.id === taskId);
-    if (task && task.steps) {
+    let task;
+    // Try to find the task in the context of the current page/view
+    if (this.currentPage === 'plan') {
+      const planTasks = this.getTasksForCurrentPlanViewSorted();
+      task = planTasks.find(t => t.id === taskId);
+    }
+
+    if (!task) {
+      // Fallback: try 'Today's tasks' (used by timer), then 'Upcoming' (home page specific)
+      // This assumes task IDs are unique enough across these different task sources.
+      const todayTasks = this.getTasksForToday();
+      task = todayTasks.find(t => t.id === taskId);
+      if (!task) {
+          const upcomingTasks = this.getUpcomingTasks();
+          task = upcomingTasks.find(t => t.id === taskId);
+      }
+    }
+
+    if (!task) {
+        console.error(`updateTaskStepCompletion: Task with ID ${taskId} not found.`);
+        return;
+    }
+
+    if (task.steps) {
       const step = task.steps.find(s => s.id === stepId);
       if (step) {
+        // Prevent unchecking a completed step
+        if (!isChecked && step.completed) {
+          console.log(`Step "${step.title}" is already completed and cannot be unchecked.`);
+          const checkboxElement = document.querySelector(`#step-${stepId}[data-task-id="${taskId}"]`);
+          if (checkboxElement) {
+            checkboxElement.checked = true; // Visually revert the checkbox
+          }
+          // alert("Completed steps cannot be unmarked."); // Optional: user feedback
+          return; // Stop further processing
+        }
+
+        // Proceed with updating step completion
         console.log(`updateTaskStepCompletion: Found step: ${step.title}, current step.completed: ${step.completed}, received isChecked: ${isChecked}`);
         step.completed = isChecked; // Update data model
         console.log(`updateTaskStepCompletion: Step ${stepId} (${step.title}) NEW step.completed: ${step.completed}`);
@@ -219,24 +251,16 @@ class CheckMateApp {
         if (stepLiElement) {
           const labelElement = stepLiElement.querySelector(`label[for="step-${stepId}"]`);
           if (labelElement) {
-            console.log(`Label for ${stepId} current classes: ${labelElement.className}`);
-            if (isChecked) {
-              labelElement.classList.add('task-completed');
-              console.log(`Label for ${stepId} AFTER ADDING task-completed: ${labelElement.className}`);
+            // Visual styling for completion will be handled in the next step based on step.completed
+            if (step.completed) {
+              labelElement.classList.add('task-completed'); // Existing class for strikethrough
             } else {
               labelElement.classList.remove('task-completed');
-              console.log(`Label for ${stepId} AFTER REMOVING task-completed: ${labelElement.className}`);
             }
-          } else {
-            console.error(`Label element not found for stepId: ${stepId} in taskId: ${taskId}`);
           }
-          // Ensure checkbox visual state matches the data model state
           const checkboxElement = stepLiElement.querySelector(`input[type="checkbox"]`);
           if (checkboxElement) {
-            checkboxElement.checked = step.completed; // Use the model's state
-            console.log(`Checkbox for ${stepId} visual 'checked' property set to: ${checkboxElement.checked}`);
-          } else {
-            console.error(`Checkbox element not found for stepId: ${stepId} in taskId: ${taskId}`);
+            checkboxElement.checked = step.completed; // Ensure checkbox matches model
           }
         } else {
           console.error(`stepLiElement not found for stepId: ${stepId} in taskId: ${taskId}`);
@@ -249,7 +273,11 @@ class CheckMateApp {
 
         console.log(`Task ${taskId} new progress: ${task.progress}`);
         this.updateTaskCardUI(taskId); // Update the task card UI (progress bar)
+      } else {
+        console.error(`Step with ID ${stepId} not found in task ${taskId}.`);
       }
+    } else {
+        console.error(`Task with ID ${taskId} has no steps.`);
     }
   }
 
@@ -337,7 +365,7 @@ class CheckMateApp {
   openStepsModal(taskId) {
     let task;
     if (this.currentPage === 'plan') {
-      const planTasks = this.getPlanPageTasks(); // Assuming this method exists and returns the plan tasks
+      const planTasks = this.getTasksForCurrentPlanViewSorted(); // Corrected: Use the existing sorted task getter
       task = planTasks.find(t => t.id === taskId);
     }
 
