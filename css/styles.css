@@ -947,32 +947,28 @@ body {
 .bg-orange { background-color: var(--accent-orange); }
 .bg-gray { background-color: var(--text-secondary); }
 
-/* Fixed Date Filter for Plan Page */
+/* Sticky Date Filter for Plan Page */
 .plan-page-content .date-filter {
-  position: fixed;
-  /* top: value will be set by JavaScript */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px; /* Should match .container max-width */
-  box-sizing: border-box; /* Ensure padding is included in width/max-width */
-
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px; /* Stick to the top of its scrolling container (.main-content) */
   background-color: var(--primary-bg);
-  z-index: 98; /* Below header (100) and countdown (99) */
-
-  padding: 0.25rem 1rem 0.75rem 1rem; /* top, horizontal, bottom */
-  /* margin-left, margin-right removed as it's now fixed and centered */
-
-  border-bottom: 1px solid var(--border-color); /* Visual separation */
-  /* Ensure overflow-x is still handled for the buttons if they exceed width */
-  overflow-x: auto; /* From original .date-filter style */
-  scrollbar-width: none; /* From original .date-filter style */
-  -ms-overflow-style: none; /* From original .date-filter style */
+  z-index: 98;
+  padding-top: 0.25rem;
+  padding-bottom: 0.75rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  /* Overflow properties for horizontal scrolling of buttons */
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.plan-page-content .date-filter::-webkit-scrollbar { /* From original .date-filter style */
+.plan-page-content .date-filter::-webkit-scrollbar {
   display: none;
 }
-
 
 /* Dark Theme for New Task Modal */
 .new-task-modal-content-dark {
