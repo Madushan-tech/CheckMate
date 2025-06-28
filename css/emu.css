@@ -278,6 +278,32 @@ body {
     font-size: 0.9em;
 }
 
+.fingerprint-sensor-container {
+    padding: 20px;
+    margin-top: auto; /* Push towards center/bottom if notifications are few */
+    margin-bottom: 10px; /* Space above "Swipe to Unlock" */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fingerprint-icon {
+    font-size: 60px !important; /* Large icon, !important to override general .material-icons if needed */
+    color: #60a5fa; /* Tailwind blue-400 like, for a modern minimalistic blue */
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.fingerprint-icon:hover {
+    background-color: rgba(96, 165, 250, 0.1); /* Lighter blue glow on hover */
+}
+.fingerprint-icon.active-scan { /* Style when "scanning" */
+    color: #2563eb; /* Darker blue (blue-600) */
+    background-color: rgba(96, 165, 250, 0.2);
+}
+
 
 .lock-screen-content h2 { /* Swipe to unlock text */
     margin-bottom: 50px; /* Space from the bottom */
@@ -438,6 +464,8 @@ body {
     border-bottom-left-radius: 3px;
     cursor: pointer;
     outline: none;
+    color: transparent; /* Hide the "Power" text */
+    font-size: 0; /* Further ensure text is not visible/taking space */
 }
 
 /* Basic transition for page switching */

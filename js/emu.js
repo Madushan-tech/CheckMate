@@ -19,24 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelTimeDateElement = document.querySelector('.panel-time-date');
     const panelNotificationsList = notificationPanel ? notificationPanel.querySelector('.notifications-list') : null;
     const clearAllButton = notificationPanel ? notificationPanel.querySelector('.clear-all-notifications') : null;
+    const fingerprintSensor = document.querySelector('.fingerprint-icon');
 
 
-    let isScreenOn = true; // Default: Screen is ON
-    let isLocked = true;   // Default: Phone is LOCKED
+    let isScreenOn = false; // Default: Screen is OFF
+    let isLocked = true;    // Default: Phone is LOCKED (when it turns on)
     let currentPage = 0;
 
     // --- Power Button Functionality ---
     powerButton.addEventListener('click', () => {
-        if (isScreenOn) {
-            // Screen is currently ON (either lock or home), so turn it OFF
-            isScreenOn = false;
-            phoneScreen.style.backgroundColor = '#000'; // Set screen to black
-            lockScreen.classList.add('hidden');
-            homeScreen.classList.remove('active'); // Ensure home screen is also hidden
-            if (notificationPanel && notificationPanel.classList.contains('open')) {
-                closeNotificationPanel(); // Close panel if it's open when screen turns off
-            }
-        } else {
+        if (!isScreenOn) {
             // Screen is currently OFF, so turn it ON to the lock screen
             isScreenOn = true;
             isLocked = true; // Always go to lock screen when turning "on" with power button
@@ -45,8 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
             lockScreen.classList.remove('hidden');
             homeScreen.classList.remove('active'); // Ensure home screen is not shown
 
-            // displayWelcomeNotification(); // Welcome notification now shown when panel opens
-            updateTime(); // Ensure time is current
+            updateTime(); // Ensure time is current & visible
+            // Welcome notification is handled by opening the panel, not directly by power button.
+        } else {
+            // Screen is currently ON (either lock or home), so turn it OFF
+            isScreenOn = false;
+            phoneScreen.style.backgroundColor = '#000'; // Set screen to black
+            lockScreen.classList.add('hidden');
+            homeScreen.classList.remove('active'); // Ensure home screen is also hidden
+            if (notificationPanel && notificationPanel.classList.contains('open')) {
+                closeNotificationPanel(); // Close panel if it's open when screen turns off
+            }
+            // No need to update time if screen is turning off
         }
     });
 
@@ -273,24 +275,23 @@ document.addEventListener('DOMContentLoaded', () => {
     sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
     dockApps.forEach(app => dock.appendChild(createAppElement(app)));
 
-    // Initial setup: Phone starts ON and LOCKED
+    // Initial setup: Phone starts OFF
     function initializeEmulatorView() {
-        phoneScreen.style.backgroundColor = 'transparent'; // Lock screen (or home screen) provides its own background
+        // Screen is initially off
+        phoneScreen.style.backgroundColor = '#000';
+        lockScreen.classList.add('hidden');
+        homeScreen.classList.remove('active'); // Ensure home is hidden
 
-        if (isLocked) {
-            lockScreen.classList.remove('hidden');
-            homeScreen.classList.remove('active');
-            // displayWelcomeNotification(); // Welcome notification now shown when panel opens
-        } else {
-            // This case should ideally not happen on initial load if isLocked is true by default
-            lockScreen.classList.add('hidden');
-            homeScreen.classList.add('active');
-            showPage(currentPage); // Show current page (should be 0)
-        }
-        updateTime(); // Update time immediately
+        // Time will update once screen is turned on by power button
+        // No need to call updateTime() here if screen is off.
     }
 
-    initializeEmulatorView(); // Call the function to set up the view
+    // Populate apps once on DOM load, regardless of screen state
+    sampleAppsPage0.forEach(app => page0Grid.appendChild(createAppElement(app)));
+    sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
+    dockApps.forEach(app => dock.appendChild(createAppElement(app)));
+
+    initializeEmulatorView(); // Set initial visual state (screen off)
 
     // --- Navigation Button Event Listeners ---
     navHomeButton.addEventListener('click', () => {
@@ -432,5 +433,51 @@ document.addEventListener('DOMContentLoaded', () => {
             // welcomeNotificationShown = false;
         });
     }
+    // updateTime(); // Removed: Initial time update handled by power on
 
+    // --- Fingerprint Sensor Logic ---
+    let fingerprintTimer = null;
+    let fingerprintTouchStartTime = 0;
+
+    if (fingerprintSensor) {
+        const clearFingerprintScan = () => {
+            if (fingerprintTimer) {
+                clearTimeout(fingerprintTimer);
+                fingerprintTimer = null;
+            }
+            fingerprintSensor.classList.remove('active-scan');
+        };
+
+        const startFingerprintScan = (event) => {
+            // Allow scan only if on lock screen and screen is on
+            if (!isScreenOn || !isLocked || lockScreen.classList.contains('hidden')) {
+                return;
+            }
+            event.preventDefault(); // Prevent default touch actions like scrolling or text selection
+
+            fingerprintSensor.classList.add('active-scan');
+            fingerprintTouchStartTime = Date.now();
+
+            fingerprintTimer = setTimeout(() => {
+                // Check actual hold time, allow slight variance like 4900ms for a 5000ms target
+                if (Date.now() - fingerprintTouchStartTime >= 4900) {
+                    unlockScreen();
+                }
+                clearFingerprintScan();
+            }, 5000);
+        };
+
+        fingerprintSensor.addEventListener('mousedown', startFingerprintScan);
+        fingerprintSensor.addEventListener('touchstart', startFingerprintScan, { passive: false });
+
+        // Events to cancel the scan
+        fingerprintSensor.addEventListener('mouseup', clearFingerprintScan);
+        fingerprintSensor.addEventListener('touchend', clearFingerprintScan);
+        fingerprintSensor.addEventListener('touchcancel', clearFingerprintScan);
+        fingerprintSensor.addEventListener('mouseleave', () => {
+            if (fingerprintTimer) { // Only clear if a scan was genuinely in progress
+                clearFingerprintScan();
+            }
+        });
+    }
 });
