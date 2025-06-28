@@ -863,6 +863,39 @@ class CheckMateApp {
     this.initializeAndDisplayTaskCountdown(); // Refresh countdown with new page context
   }
 
+  calculateTodayJourneyStats() {
+    const todayTasks = this.getTasksForToday(); // Get fresh processed tasks
+    const stats = {
+      totalPlan: todayTasks.length,
+      completed: 0,
+      nextDay: 0, // Corresponds to 'incomplete-rescheduled' status
+      incomplete: 0,
+      cancelled: 0, // Assumes 'cancelled' status can exist for today's tasks
+    };
+    const now = new Date();
+
+    for (const task of todayTasks) {
+      // task.status can be: 'pending-today-am', 'pending-today-pm', 'incomplete-rescheduled',
+      // or potentially 'completed', 'cancelled' if modified from raw data or by interactions.
+      if (task.status === 'completed') {
+        stats.completed++;
+      } else if (task.status === 'incomplete-rescheduled') {
+        stats.nextDay++;
+      } else if (task.status === 'cancelled') {
+        stats.cancelled++;
+      } else {
+        // Check for 'incomplete': task's end time is past, and it's not in another resolved state.
+        const { endDate } = this.parseTaskDateTime(task.time, now); // Use 'now' for today's context
+        if (endDate < now) {
+          // If time has passed and it's not completed, rescheduled, or cancelled, it's incomplete.
+          stats.incomplete++;
+        }
+        // Tasks that are pending and their time has not passed yet are just part of totalPlan.
+      }
+    }
+    return stats;
+  }
+
   loadPageContent(page) {
     const mainContent = document.querySelector('.main-content');
     
@@ -911,7 +944,7 @@ class CheckMateApp {
           <div class="stats-icon-section">
             <span class="material-icons stats-icon">list_alt</span>
             <div class="stats-label">Plan</div>
-            <div class="stats-number">12</div>
+            <div class="stats-number" id="stats-plan-number">00</div>
           </div>
           <div class="stats-details">
             <div class="stats-row">
@@ -919,28 +952,28 @@ class CheckMateApp {
                 <span class="material-icons">check_circle</span>
                 <span>Complete</span>
               </div>
-              <span class="stats-badge badge-green">07</span>
+              <span class="stats-badge badge-green" id="stats-complete-badge">00</span>
             </div>
             <div class="stats-row">
               <div class="stats-item text-yellow">
                 <span class="material-icons">skip_next</span>
                 <span>Next Day</span>
               </div>
-              <span class="stats-badge badge-yellow">02</span>
+              <span class="stats-badge badge-yellow" id="stats-nextday-badge">00</span>
             </div>
             <div class="stats-row">
               <div class="stats-item text-red">
-                <span class="material-icons">cancel</span>
+                <span class="material-icons">error_outline</span> <!-- Changed icon for Incomplete -->
                 <span>Incomplete</span>
               </div>
-              <span class="stats-badge badge-red">02</span>
+              <span class="stats-badge badge-red" id="stats-incomplete-badge">00</span>
             </div>
             <div class="stats-row">
               <div class="stats-item text-gray">
-                <span class="material-icons">delete</span>
+                <span class="material-icons">delete_outline</span> <!-- Changed icon for Cancel -->
                 <span>Cancel</span>
               </div>
-              <span class="stats-badge badge-gray">01</span>
+              <span class="stats-badge badge-gray" id="stats-cancel-badge">00</span>
             </div>
           </div>
         </div>
@@ -963,6 +996,23 @@ class CheckMateApp {
     // For now, let's assume initializeAndDisplayTaskCountdown handles its state correctly.
     // If initializeAndDisplayTaskCountdown needs to be aware of the current page, that's a deeper refactor.
     // this.initializeAndDisplayTaskCountdown(); // Re-evaluate if this is needed here or if global one is enough
+
+    const todayStats = this.calculateTodayJourneyStats();
+
+    const planElement = mainContentContainer.querySelector('#stats-plan-number');
+    if (planElement) planElement.textContent = String(todayStats.totalPlan).padStart(2, '0');
+
+    const completeElement = mainContentContainer.querySelector('#stats-complete-badge');
+    if (completeElement) completeElement.textContent = String(todayStats.completed).padStart(2, '0');
+
+    const nextDayElement = mainContentContainer.querySelector('#stats-nextday-badge');
+    if (nextDayElement) nextDayElement.textContent = String(todayStats.nextDay).padStart(2, '0');
+
+    const incompleteElement = mainContentContainer.querySelector('#stats-incomplete-badge');
+    if (incompleteElement) incompleteElement.textContent = String(todayStats.incomplete).padStart(2, '0');
+
+    const cancelElement = mainContentContainer.querySelector('#stats-cancel-badge');
+    if (cancelElement) cancelElement.textContent = String(todayStats.cancelled).padStart(2, '0');
   }
 
   loadPlanPage(mainContentContainer) { // Renamed 'container' for clarity
