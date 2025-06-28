@@ -50,6 +50,16 @@ body {
     position: relative;
 }
 
+.screen-background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Default overlay, similar to lock screen design */
+    z-index: 0; /* Ensure it's behind the content */
+}
+
 .lock-screen, .home-screen {
     width: 100%;
     height: 100%;
@@ -130,6 +140,8 @@ body {
 /* No need for .lock-screen .status-bar specific styles if they are now identical */
 
 .search-bar-container {
+    position: relative; /* To sit above the .screen-background-overlay */
+    z-index: 1;         /* To sit above the .screen-background-overlay */
     background-color: white;
     border-radius: 28px; /* Fully rounded for pill shape */
     padding: 10px 16px;
@@ -186,6 +198,8 @@ body {
 }
 
 .lock-screen-content {
+    position: relative; /* To sit above the .screen-background-overlay */
+    z-index: 1;         /* To sit above the .screen-background-overlay */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
