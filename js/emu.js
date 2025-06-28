@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const panelNotificationsList = notificationPanel ? notificationPanel.querySelector('.notifications-list') : null;
     const clearAllButton = notificationPanel ? notificationPanel.querySelector('.clear-all-notifications') : null;
     const fingerprintSensor = document.querySelector('.fingerprint-icon');
+    const panelSwipeHandle = document.querySelector('.panel-swipe-handle');
+    const panelSwipeIcon = document.querySelector('.panel-swipe-icon');
 
 
     let isScreenOn = false; // Default: Screen is OFF
@@ -287,6 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Populate apps once on DOM load, regardless of screen state
+    // Clear existing icons before populating to prevent duplicates
+    // (e.g. if this script part was somehow re-evaluated or for hot-reloading scenarios)
+    if(page0Grid) page0Grid.innerHTML = '';
+    if(page1Grid) page1Grid.innerHTML = '';
+    if(dock) dock.innerHTML = '';
+
+    // Populate apps once on DOM load
     sampleAppsPage0.forEach(app => page0Grid.appendChild(createAppElement(app)));
     sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
     dockApps.forEach(app => dock.appendChild(createAppElement(app)));
@@ -354,21 +363,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggleNotificationPanel() {
-        if (notificationPanel) {
+        if (notificationPanel && panelSwipeIcon) {
             notificationPanel.classList.toggle('open');
+            if (notificationPanel.classList.contains('open')) {
+                panelSwipeIcon.textContent = 'keyboard_arrow_down';
+                openNotificationPanel(); // Call the function that handles showing welcome notification
+            } else {
+                panelSwipeIcon.textContent = 'keyboard_arrow_up';
+                // closeNotificationPanel() is implicitly handled by removing .open,
+                // but if openNotificationPanel has specific logic, ensure close does too if needed.
+            }
         }
     }
 
-    // Temporary trigger: Click on any status bar to toggle panel
-    mainStatusBarElements.forEach(bar => {
-        bar.addEventListener('click', (event) => {
-            // Prevent clicks on status bar content (like time or icons) from toggling if not desired
-            // For now, any click on status bar will toggle.
-            if (isScreenOn) { // Only allow opening if screen is on
-                 toggleNotificationPanel();
+    // Temporary trigger: Click on any status bar to toggle panel - REMOVED
+    // mainStatusBarElements.forEach(bar => {
+    //     bar.addEventListener('click', (event) => {
+    //         if (isScreenOn) {
+    //              toggleNotificationPanel();
+    //         }
+    //     });
+    // });
+
+    if (panelSwipeHandle) {
+        panelSwipeHandle.addEventListener('click', () => {
+            if (isScreenOn) { // Only allow toggling if screen is on
+                toggleNotificationPanel();
             }
         });
-    });
+    }
 
     // Close panel if home button is pressed and panel is open
     navHomeButton.addEventListener('click', () => {
@@ -376,6 +399,10 @@ document.addEventListener('DOMContentLoaded', () => {
             closeNotificationPanel();
         }
         // Existing home button functionality (showPage(0)) will still run
+        // Also ensure home screen is active
+        if (isScreenOn && !isLocked) {
+            showPage(0);
+        }
     });
 
 
@@ -459,12 +486,12 @@ document.addEventListener('DOMContentLoaded', () => {
             fingerprintTouchStartTime = Date.now();
 
             fingerprintTimer = setTimeout(() => {
-                // Check actual hold time, allow slight variance like 4900ms for a 5000ms target
-                if (Date.now() - fingerprintTouchStartTime >= 4900) {
+                // Check actual hold time, allow slight variance like 1900ms for a 2000ms target
+                if (Date.now() - fingerprintTouchStartTime >= 1900) {
                     unlockScreen();
                 }
                 clearFingerprintScan();
-            }, 5000);
+            }, 2000); // Changed to 2 seconds
         };
 
         fingerprintSensor.addEventListener('mousedown', startFingerprintScan);

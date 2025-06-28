@@ -118,10 +118,7 @@ body {
     gap: 6px; /* Spacing between items */
 }
 
-.status-bar-left .carrier {
-    font-size: 0.8em;
-    margin-right: 8px; /* Space between carrier and time */
-}
+/* .status-bar-left .carrier removed */
 
 .status-bar .time {
     font-size: 0.8em; /* Smaller time in status bar */
@@ -573,7 +570,8 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%; /* Or a max-height if it shouldn't always be full screen */
+    height: 50%; /* Reduced height */
+    max-height: 50vh; /* Ensure it doesn't exceed viewport if phone is taller */
     background-color: rgba(20, 20, 30, 0.95); /* Dark, slightly transparent - adjust as needed */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -756,4 +754,34 @@ body {
 
 .panel-footer-button:hover {
     background-color: rgba(75, 85, 99, 0.9); /* Darker gray */
+}
+
+.panel-swipe-handle {
+    position: absolute;
+    bottom: 50px; /* Positioned above the 50px nav-buttons */
+    left: 0;
+    right: 0;
+    height: 30px; /* Small tappable area */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 950; /* Above nav-buttons, below panel and popups */
+    cursor: pointer;
+    /* background-color: rgba(255,0,0,0.2); */ /* Optional: for debugging visibility */
+}
+
+.panel-swipe-icon {
+    color: #fff; /* White icon, assuming dark background or overlay */
+    font-size: 30px !important; /* Ensure it's large enough */
+    opacity: 0.7;
+    transition: opacity 0.2s ease, transform 0.3s ease-in-out;
+}
+
+.panel-swipe-handle:hover .panel-swipe-icon {
+    opacity: 1;
+}
+
+/* Style for when panel is open, arrow points down */
+.notification-panel.open + .panel-swipe-handle .panel-swipe-icon {
+    transform: rotate(180deg);
 }
