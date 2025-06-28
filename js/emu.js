@@ -4,8 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeScreen = document.querySelector('.home-screen');
     const powerButton = document.querySelector('.power-button');
     const timeElements = document.querySelectorAll('.time');
+    const notificationsContainer = lockScreen.querySelector('.notifications');
     const appPages = document.querySelectorAll('.app-grid');
     const pageDots = document.querySelectorAll('.page-indicator .dot');
+    const navHomeButton = document.querySelector('.nav-home');
+    // const navBackButton = document.querySelector('.nav-back'); // For future use
+    // const navRecentsButton = document.querySelector('.nav-recents'); // For future use
+
 
     let isScreenOn = false;
     let isLocked = true;
@@ -15,10 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     powerButton.addEventListener('click', () => {
         isScreenOn = !isScreenOn;
         if (isScreenOn) {
-            phoneScreen.style.backgroundColor = isLocked ? '#333' : '#eee'; // Lock or home screen color
+            phoneScreen.style.backgroundColor = isLocked ? 'transparent' : '#eee'; // Lock screen uses its own bg
             if (isLocked) {
                 lockScreen.classList.remove('hidden');
                 homeScreen.classList.remove('active');
+                displayWelcomeNotification();
             } else {
                 lockScreen.classList.add('hidden');
                 homeScreen.classList.add('active');
@@ -32,9 +38,28 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTime(); // Update time when screen turns on
     });
 
+    // --- Notification Display ---
+    function displayWelcomeNotification() {
+        notificationsContainer.innerHTML = ''; // Clear existing notifications
+
+        const notificationHTML = `
+            <div class="notification">
+                <div class="app-name">CheckMate App</div>
+                <div class="title">Welcome to CheckMate</div>
+                <div class="text">Thank you for choosing CheckMate! Explore its features.</div>
+            </div>
+        `;
+        // For now, just one notification. Could be expanded to an array.
+        notificationsContainer.innerHTML = notificationHTML;
+    }
+
     // --- Time Display ---
     function updateTime() {
-        if (!isScreenOn) return;
+        // Update time if the screen is on OR if the lock screen is currently visible
+        const lockScreenVisible = !lockScreen.classList.contains('hidden');
+        if (!isScreenOn && !lockScreenVisible) {
+            return;
+        }
 
         const now = new Date();
         const targetTimezoneOffset = 5.5 * 60; // +5:30 in minutes
@@ -181,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isScreenOn) {
         if (isLocked) {
             lockScreen.classList.remove('hidden');
+            displayWelcomeNotification(); // Ensure notification shows if starting locked and on
         } else {
             homeScreen.classList.add('active');
             showPage(0); // Show first page
@@ -188,5 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         phoneScreen.style.backgroundColor = '#000'; // Screen off
     }
+
+    // --- Navigation Button Event Listeners ---
+    navHomeButton.addEventListener('click', () => {
+        if (isScreenOn && !isLocked) {
+            showPage(0); // Go to the first app page (home)
+        }
+    });
+
+    // Placeholder for other nav buttons
+    // navBackButton.addEventListener('click', () => { ... });
+    // navRecentsButton.addEventListener('click', () => { ... });
+
     updateTime(); // Initial time update
 });

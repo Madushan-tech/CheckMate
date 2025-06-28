@@ -42,9 +42,12 @@ body {
 }
 
 .lock-screen {
-    background-color: #333;
+    /* Night sky gradient wallpaper */
+    background: linear-gradient(to bottom, #000033, #000066, #1a1a8c);
     color: #fff;
     z-index: 10; /* Ensure lock screen is on top */
+    display: flex; /* Ensure it's flex for content alignment */
+    flex-direction: column; /* Stack status bar, content, etc. */
 }
 
 .lock-screen.hidden {
@@ -52,8 +55,12 @@ body {
 }
 
 .home-screen {
-    background-color: #eee;
+    /* Similar night sky gradient wallpaper to lock screen */
+    background: linear-gradient(to bottom, #000033, #000066, #1a1a8c);
+    /* Fallback for older browsers, though gradient is widely supported */
+    /* background-color: #000033; */
     display: none; /* Initially hidden */
+    position: relative; /* Needed for absolute positioning of children like nav-buttons */
 }
 
 .home-screen.active {
@@ -65,21 +72,67 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 10px 15px;
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #000; /* Default for home screen */
+    background-color: rgba(0, 0, 0, 0.2); /* Slightly darker for better contrast with white text */
+    color: #fff; /* White text for home screen as well now */
+    position: relative; /* Ensure it stays on top */
+    z-index: 10; /* Make sure it's above other content */
 }
 
 .lock-screen .status-bar {
-    color: #fff; /* White text for lock screen */
+    /* color: #fff; // Already white due to general .status-bar rule */
+    /* background-color is inherited or can be made more transparent if needed */
+    background-color: rgba(0,0,0,0.1); /* Can be slightly different if desired for lock screen */
+    position: relative;
+    z-index: 1; /* z-index within lock-screen context */
 }
-
 
 .lock-screen-content {
     flex-grow: 1;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Stack notifications and swipe text */
+    justify-content: space-between; /* Push swipe text to bottom */
     align-items: center;
     text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.notifications {
+    width: 100%;
+    max-height: 50%; /* Limit notification area height */
+    overflow-y: auto;
+    margin-top: 10px; /* Space below status bar */
+    margin-bottom: auto; /* Pushes "Swipe to Unlock" down */
+}
+
+.notification {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.notification .app-name {
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-bottom: 3px;
+    opacity: 0.8;
+}
+
+.notification .title {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.notification .text {
+    font-size: 0.9em;
+}
+
+
+.lock-screen-content h2 { /* Swipe to unlock text */
+    margin-bottom: 50px; /* Space from the bottom */
 }
 
 .app-grid {
@@ -125,12 +178,22 @@ body {
     padding: 10px;
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(5px);
+    position: absolute; /* Position above nav-buttons */
+    bottom: 80px;      /* nav-buttons height (50px) + page-indicator height (approx 30px) */
+    left: 0;
+    right: 0;
+    z-index: 4; /* Below nav-buttons' items if they had dropdowns, but above app-grid */
 }
 
 .page-indicator {
     display: flex;
     justify-content: center;
     padding: 10px;
+    position: absolute; /* Position above nav-buttons */
+    bottom: 50px;      /* nav-buttons height */
+    left: 0;
+    right: 0;
+    z-index: 4;
 }
 
 .page-indicator .dot {
@@ -145,6 +208,36 @@ body {
 .page-indicator .dot.active {
     background-color: #888;
 }
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.05); /* Light background for nav bar */
+    border-top: 1px solid rgba(0,0,0,0.1);
+    height: 50px; /* Fixed height for nav bar */
+    position: absolute; /* Position at the bottom of home-screen */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 5; /* Above app grid but below potential popups */
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 24px; /* Adjust for icon size */
+    cursor: pointer;
+    padding: 10px 20px;
+    flex-grow: 1; /* Distribute space equally */
+    outline: none;
+}
+
+.nav-button:hover {
+    background-color: rgba(0,0,0,0.1);
+}
+
 
 .power-button {
     position: absolute;
@@ -166,10 +259,11 @@ body {
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     position: absolute; /* Needed for transform */
     width: calc(100% - 40px); /* Adjust for padding */
-    height: calc(100% - 120px); /* Adjust for status bar, dock, indicator */
+    /* status bar (40px) + dock + page indicator + nav buttons (50px) */
+    height: calc(100% - 40px - 70px - 30px - 50px); /* Approximate current values, may need fine-tuning */
     left: 20px; /* Adjust for padding */
     top: 40px; /* Adjust for status bar */
-
+    box-sizing: border-box; /* Ensure padding is included in height calculation */
 }
 
 .app-grid:not(.active) {
