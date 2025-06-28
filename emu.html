@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartphone Emulator</title>
+    <link rel="stylesheet" href="css/emu.css">
+</head>
+<body>
+    <div class="phone">
+        <div class="screen">
+            <div class="lock-screen">
+                <div class="status-bar">
+                    <span class="time"></span>
+                    <span class="battery">100%</span>
+                </div>
+                <div class="lock-screen-content">
+                    <h2>Swipe to Unlock</h2>
+                </div>
+            </div>
+            <div class="home-screen">
+                <div class="status-bar">
+                    <span class="time"></span>
+                    <span class="battery">100%</span>
+                </div>
+                <div class="app-grid page-0 active">
+                    <!-- Apps for home screen -->
+                </div>
+                <div class="app-grid page-1">
+                    <!-- Apps for page 1 -->
+                </div>
+                <div class="dock">
+                    <!-- Dock apps -->
+                </div>
+                <div class="page-indicator">
+                    <span class="dot active" data-page="0"></span>
+                    <span class="dot" data-page="1"></span>
+                </div>
+            </div>
+        </div>
+        <button class="power-button">Power</button>
+    </div>
+    <script src="js/emu.js"></script>
+</body>
+</html>
