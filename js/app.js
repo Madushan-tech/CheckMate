@@ -529,6 +529,76 @@ class CheckMateApp {
     });
   }
 
+  getTasksForToday() {
+    const rawTasks = [
+      // Morning Tasks (Before 12 PM - will get yellow icon)
+      { id: 'todayTask1', title: 'Morning Jog & Stretch', time: '6:30 A.M. - 7:00 A.M.', project: 'Health', categoryIcon: 'fitness_center', categoryIconColor: 'text-green-500', type: 'single-step' },
+      { id: 'todayTask2', title: 'Review Email & Plan Day', time: '7:00 A.M. - 7:30 A.M.', project: 'Work', categoryIcon: 'email', categoryIconColor: 'text-blue-400', type: 'single-step' },
+      { id: 'todayTask3', title: 'Breakfast & News Update', time: '7:30 A.M. - 8:00 A.M.', project: 'Personal', categoryIcon: 'free_breakfast', categoryIconColor: 'text-orange-500', type: 'single-step' },
+      { id: 'todayTask4', title: 'Deep Work Session 1: Project Alpha', time: '8:30 A.M. - 10:30 A.M.', project: 'Work', categoryIcon: 'laptop_mac', categoryIconColor: 'text-teal-500', type: 'multi-step', progress: 0, steps: [{id:'s1', title:'Outline'}, {id:'s2', title:'Draft'}] },
+      { id: 'todayTask5', title: 'Language Learning: Spanish Duolingo', time: '10:30 A.M. - 11:00 A.M.', project: 'Learning', categoryIcon: 'translate', categoryIconColor: 'text-purple-500', type: 'single-step' },
+      { id: 'todayTask6', title: 'Quick Errands Run', time: '11:00 A.M. - 11:45 A.M.', project: 'Chores', categoryIcon: 'directions_run', categoryIconColor: 'text-lime-600', type: 'single-step' },
+
+      // Afternoon / Evening Tasks (Default icon colors unless specified)
+      { id: 'todayTask7', title: 'Lunch & Short Break', time: '12:00 P.M. - 12:45 P.M.', project: 'Personal', categoryIcon: 'restaurant', categoryIconColor: 'text-orange-500', type: 'single-step' },
+      { id: 'todayTask8', title: 'Creative Writing: Blog Post Draft', time: '1:00 P.M. - 2:30 P.M.', project: 'Creative', categoryIcon: 'edit_document', categoryIconColor: 'text-indigo-500', type: 'single-step' },
+      { id: 'todayTask9', title: 'Exercise: Home Workout', time: '2:45 P.M. - 3:30 P.M.', project: 'Health', categoryIcon: 'exercise', icon:'fitness_center', categoryIconColor: 'text-green-600', type: 'single-step' }, // using fitness_center again
+      { id: 'todayTask10', title: 'Hobby: Miniature Painting', time: '3:45 P.M. - 5:00 P.M.', project: 'Hobby', categoryIcon: 'brush', categoryIconColor: 'text-pink-500', type: 'single-step' },
+      { id: 'todayTask11', title: 'Call with Family', time: '5:00 P.M. - 5:45 P.M.', project: 'Personal', categoryIcon: 'call', categoryIconColor: 'text-blue-500', type: 'single-step' },
+      { id: 'todayTask12', title: 'Prepare Dinner', time: '6:00 P.M. - 6:45 P.M.', project: 'Home', categoryIcon: 'soup_kitchen', categoryIconColor: 'text-orange-600', type: 'single-step' },
+      { id: 'todayTask13', title: 'Dinner', time: '6:45 P.M. - 7:30 P.M.', project: 'Personal', categoryIcon: 'dinner_dining', categoryIconColor: 'text-orange-500', type: 'single-step' },
+      { // Movie Watching - Rest of movie
+        id: 'todayMovieCont', title: 'Movie Watching (Rest of movie)', time: '8:00 P.M. - 9:00 P.M.', project: 'Personal',
+        categoryIcon: 'movie', categoryIconColor: 'text-red-500', // Original category icon/color
+        status: 'incomplete-rescheduled', type: 'single-step'
+      },
+      { id: 'todayTask14', title: 'Reading: Tech Article', time: '9:00 P.M. - 9:45 P.M.', project: 'Learning', categoryIcon: 'article', categoryIconColor: 'text-purple-600', type: 'single-step' },
+      { id: 'todayTask15', title: 'Journaling & Reflection', time: '9:45 P.M. - 10:15 P.M.', project: 'Personal', categoryIcon: 'book', categoryIconColor: 'text-gray-500', type: 'single-step' },
+      { id: 'todayTask16', title: 'Plan for Sunday (Tomorrow)', time: '10:15 P.M. - 10:45 P.M.', project: 'Planning', categoryIcon: 'event_note', categoryIconColor: 'text-gray-600', type: 'single-step' },
+      // Total 17 tasks
+    ];
+
+    const now = new Date(); // Not strictly needed for AM/PM if time strings are clear, but good for future use
+    const noon = new Date(now);
+    noon.setHours(12, 0, 0, 0);
+
+    return rawTasks.map(task => {
+      const parts = task.title.split(': ');
+      const displayTitle = parts.length > 1 ? parts.slice(1).join(': ') : task.title;
+
+      let determinedDisplayIcon = task.categoryIcon;
+      let determinedDisplayIconColor = task.categoryIconColor;
+      let determinedStatus = task.status || 'pending'; // Default to 'pending' for today
+
+      // Check if task time is AM for yellow icon rule
+      const taskStartTimeStr = task.time.split(' - ')[0];
+      const isAM = taskStartTimeStr.toUpperCase().includes('A.M.');
+      const hourPart = parseInt(taskStartTimeStr.split(':')[0]);
+      const isBeforeNoon = isAM && (hourPart < 12 || hourPart === 12); // 12 AM is before noon, other AMs are too.
+
+      if (determinedStatus === 'incomplete-rescheduled') {
+        determinedDisplayIcon = 'autorenew'; // Green incomplete icon
+        determinedDisplayIconColor = 'text-green';
+      } else if (isBeforeNoon) { // Apply yellow icon for tasks before 12 PM today
+        determinedDisplayIcon = task.categoryIcon;
+        determinedDisplayIconColor = 'text-yellow'; // #FDFD96
+        determinedStatus = 'pending-today-am';
+      } else { // For PM tasks or tasks without specific AM status for yellowing
+        determinedDisplayIcon = task.categoryIcon;
+        determinedDisplayIconColor = task.categoryIconColor; // Default category color
+        if (determinedStatus === 'pending') determinedStatus = 'pending-today-pm';
+      }
+
+      return {
+        ...task,
+        title: displayTitle,
+        displayIcon: determinedDisplayIcon,
+        displayIconColor: determinedDisplayIconColor,
+        status: determinedStatus
+      };
+    });
+  }
+
   openTab(evt, tabName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tab-content");
@@ -703,6 +773,8 @@ class CheckMateApp {
                 mainContentEl.style.paddingTop = '0'; // Or its default if no countdown
             }
         }
+        // Toggle FAB visibility based on page
+        this.toggleFabVisibility(page === 'plan');
 
       }
     } else if (taskCountdownContainer) { // Fallback if headerElement is not found (e.g. header hidden by default)
@@ -848,61 +920,84 @@ class CheckMateApp {
   loadPlanPage(mainContentContainer) { // Renamed 'container' for clarity
     // Removed clearInterval for global countdown
 
+    // Dates for button labels - can be dynamic if needed
     const today = new Date();
-    const todayPlus2 = new Date(today);
-    todayPlus2.setDate(today.getDate() + 2);
-    const todayPlus3 = new Date(today);
-    todayPlus3.setDate(today.getDate() + 3);
-
-    const formatDate = (date) => {
-      return `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`;
+    const formatDate = (date) => `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(-2)}`;
+    const dateValues = {
+        tomorrow: "Tomorrow",
+        today: "Today",
+        yesterday: "Yesterday",
+        custom1: "6/29/25", // Example, make dynamic if needed
+        custom2: "6/30/25", // Example
+        note: "Note" // Special button
     };
-
-    const todayStr = formatDate(today);
-    // const todayPlus2Str = formatDate(todayPlus2); // Not used in the new order
-    // const todayPlus3Str = formatDate(todayPlus3); // Not used in the new order
-
-    // Specific dates from the request
-    const date6_29_25_Str = "6/29/25";
-    const date6_30_25_Str = "6/30/25";
 
     mainContentContainer.innerHTML = `
       <div class="plan-page-content">
         <div class="date-filter">
-          <button class="date-btn">Tomorrow</button>
-          <button class="date-btn active">Today</button>
-          <button class="date-btn">Yesterday</button>
-          <button class="date-btn">${date6_29_25_Str}</button>
-          <button class="date-btn">${date6_30_25_Str}</button>
-          <button class="date-btn">Note</button>
+          <button class="date-btn">${dateValues.tomorrow}</button>
+          <button class="date-btn active">${dateValues.today}</button>
+          <button class="date-btn">${dateValues.yesterday}</button>
+          <button class="date-btn">${dateValues.custom1}</button>
+          <button class="date-btn">${dateValues.custom2}</button>
+          <button class="date-btn">${dateValues.note}</button>
+        </div>
+        <div class="tasks-list">
+          <!-- Tasks will be loaded by updateTasksForDate -->
+        </div>
+        <div id="plan-notes-section" class="notes-section" style="margin-top:1.5rem;">
+          <!-- Notes will be loaded here -->
+        </div>
       </div>
-      <div class="tasks-list">
-        ${this.generateTaskCards(this.getPlanPageTasksSorted())}
-      </div>
-    </div>
     `;
 
-    // Re-setup date filter for this page
-    this.setupDateFilter();
+    this.setupDateFilter(); // Re-setup event listeners for new buttons
 
-    // Add Plus Icon Button for New Task
-    const fabButton = document.createElement('button');
-    fabButton.id = 'add-task-fab';
-    fabButton.classList.add('fab');
-    fabButton.innerHTML = '<span class="material-icons">add</span>';
-    fabButton.addEventListener('click', () => this.openNewTaskModal());
-    mainContentContainer.appendChild(fabButton); // Append to the main container of plan page
+    // Add/Manage Plus Icon Button for New Task
+    let fabButton = document.getElementById('add-task-fab');
+    if (!fabButton) {
+        fabButton = document.createElement('button');
+        fabButton.id = 'add-task-fab';
+        fabButton.classList.add('fab');
+        fabButton.innerHTML = '<span class="material-icons">add</span>';
+        fabButton.addEventListener('click', () => this.openNewTaskModal());
+        const appContainer = document.querySelector('.container'); // Append to a more stable parent
+        if (appContainer) appContainer.appendChild(fabButton);
+    }
+    // Visibility of FAB is handled in navigateToPage
 
-    // No need for setupStickyDateFilter() if CSS handles it with top:0 and correct z-index.
+    // Initial load of tasks for the active button (default is "Today")
+    const activeButton = document.querySelector('.date-filter .date-btn.active');
+    this.updateTasksForDate(activeButton ? activeButton.textContent : dateValues.today);
   }
 
-  // Removed setupStickyDateFilter() as CSS with top:0px and correct z-index should handle stickiness.
+  toggleFabVisibility(show) {
+    const fab = document.getElementById('add-task-fab');
+    if (fab) {
+        fab.style.display = show ? 'flex' : 'none';
+    }
+  }
 
-  getPlanPageTasksSorted() {
-    const tasks = this.getPlanPageTasks();
-    // Basic time string sort (AM/PM aware, hour, then minute)
-    // This is a simplified sort; robust parsing would be better for complex cases.
-    // Assumes "H:MM A.M./P.M." format for start time.
+  // Gets tasks for the currently active date filter on the Plan page for the countdown
+  getTasksForCurrentPlanViewSorted() {
+    let tasks = [];
+    if (this.currentPage === 'plan') {
+        const activeButton = document.querySelector('.date-filter .date-btn.active');
+        const selectedDateText = activeButton ? activeButton.textContent : 'Today'; // Default to 'Today' for countdown
+
+        if (selectedDateText === 'Today') {
+            tasks = this.getTasksForToday();
+        } else if (selectedDateText === 'Tomorrow') {
+            tasks = this.getTasksForTomorrow();
+        } // Add more conditions for 'Yesterday', specific dates etc. later
+        else {
+            tasks = this.getTasksForToday(); // Default for other date buttons for now
+        }
+    } else {
+      // Fallback for countdown if not on plan page: use Today's tasks
+      tasks = this.getTasksForToday();
+    }
+
     tasks.sort((a, b) => {
       const timeA = this.parseTime(a.time);
       const timeB = this.parseTime(b.time);
@@ -910,6 +1005,57 @@ class CheckMateApp {
     });
     return tasks;
   }
+
+  updateTasksForDate(selectedDateText) {
+    console.log('Loading tasks for date:', selectedDateText);
+    const tasksListContainer = document.querySelector('.plan-page-content .tasks-list');
+    const notesSection = document.getElementById('plan-notes-section');
+    let tasks = [];
+    let notesHTML = '';
+
+    if (!tasksListContainer || !notesSection) {
+        console.error("Tasks list or notes section container not found in plan page.");
+        return;
+    }
+
+    if (selectedDateText === 'Today') {
+        tasks = this.getTasksForToday();
+        notesSection.innerHTML = ''; // Clear notes for Today
+        notesSection.style.display = 'none';
+    } else if (selectedDateText === 'Tomorrow') {
+        tasks = this.getTasksForTomorrow();
+        const cancelledTasks = tasks.filter(task => task.status === 'cancelled');
+        if (cancelledTasks.length > 0) {
+            notesHTML = '<h3>Cancelled Tasks</h3><ul>';
+            cancelledTasks.forEach(task => {
+                notesHTML += `<li>${task.title} ${task.notes ? '- ' + task.notes : ''}</li>`;
+            });
+            notesHTML += '</ul>';
+            notesSection.innerHTML = notesHTML;
+            notesSection.style.display = 'block';
+        } else {
+            notesSection.innerHTML = '';
+            notesSection.style.display = 'none';
+        }
+    } else {
+        // Placeholder for other dates - for now, show no tasks and no notes
+        tasks = [];
+        notesSection.innerHTML = '';
+        notesSection.style.display = 'none';
+        console.log(`No task data defined for: ${selectedDateText}`);
+    }
+
+    // Sort tasks before rendering (already sorted if coming from getTasksForCurrentPlanViewSorted, but good to ensure)
+    tasks.sort((a, b) => {
+      const timeA = this.parseTime(a.time);
+      const timeB = this.parseTime(b.time);
+      return timeA.hour - timeB.hour || timeA.minute - timeB.minute;
+    });
+
+    tasksListContainer.innerHTML = this.generateTaskCards(tasks);
+    this.initializeAndDisplayTaskCountdown(); // Refresh countdown based on new view
+  }
+
 
   parseTime(timeStr) {
     // Extracts start time, e.g., "6:00 A.M." from "6:00 A.M. - 6:30 A.M."
@@ -1007,8 +1153,10 @@ class CheckMateApp {
         <div class="task-header">
           <h3 class="task-title">${task.title}</h3>
           <div class="task-icons">
-            <span class="material-icons ${task.iconColor}">${task.icon}</span>
-            ${task.secondaryIcon ? `<span class="material-icons ${task.secondaryIcon.color}">${task.secondaryIcon.name}</span>` : ''}
+            <!-- Primary Display Icon -->
+            <span class="material-icons ${task.displayIconColor || task.categoryIconColor || 'text-gray'}">${task.displayIcon || task.categoryIcon || 'task_alt'}</span>
+            <!-- Secondary Icon (if any) -->
+            ${task.secondaryIcon ? `<span class="material-icons ${task.secondaryIcon.color || 'text-gray'}">${task.secondaryIcon.name}</span>` : ''}
           </div>
         </div>
         <div class="task-meta">
@@ -1118,81 +1266,110 @@ class CheckMateApp {
     ];
   }
 
-  getPlanPageTasks() {
-    const tasks = [
+  // Renamed from getPlanPageTasks and updated for "Tomorrow" specific logic
+  getTasksForTomorrow() {
+    const rawTasks = [
       // Daily Routine
       {
-        id: 'planTask1', title: 'Wake Up & Morning Routine', time: '6:00 A.M. - 6:30 A.M.', project: 'Personal', icon: 'alarm', iconColor: 'text-blue-500', type: 'single-step'
+        id: 'planTask1', title: 'Wake Up & Morning Routine', time: '6:00 A.M. - 6:30 A.M.', project: 'Personal', categoryIcon: 'alarm', categoryIconColor: 'text-blue-500', type: 'single-step'
       },
       {
-        id: 'planTask2', title: 'Breakfast', time: '7:00 A.M. - 7:30 A.M.', project: 'Personal', icon: 'free_breakfast', iconColor: 'text-orange-500', type: 'single-step'
+        id: 'planTask2', title: 'Breakfast', time: '7:00 A.M. - 7:30 A.M.', project: 'Personal', categoryIcon: 'free_breakfast', categoryIconColor: 'text-orange-500', type: 'single-step'
       },
       // Learning & Office
       {
-        id: 'planTask3', title: 'Learning: Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', icon: 'school', iconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
+        id: 'planTask3', title: 'Learning: Advanced JavaScript', time: '8:00 A.M. - 9:30 A.M.', project: 'Learning', categoryIcon: 'school', categoryIconColor: 'text-purple-500', type: 'multi-step', progress: 0.25, steps: [
           { id: 'ppt3s1', title: 'Module 1: Asynchronous JS', completed: true }, { id: 'ppt3s2', title: 'Module 2: ES6+ Features', completed: false }, { id: 'ppt3s3', title: 'Module 3: Design Patterns', completed: false }, { id: 'ppt3s4', title: 'Module 4: Performance Optimization', completed: false }
         ]
-      }, // Title was already changed in previous step, re-adding category for consistency before stripping
+      },
       {
-        id: 'planTask4', title: 'Office: Team Sync Meeting', time: '10:00 A.M. - 10:45 A.M.', project: 'Work', icon: 'work', iconColor: 'text-teal-500', type: 'single-step'
+        id: 'planTask4', title: 'Office: Team Sync Meeting', time: '10:00 A.M. - 10:45 A.M.', project: 'Work', categoryIcon: 'work', categoryIconColor: 'text-teal-500', type: 'single-step'
       },
       // Development
       {
-        id: 'planTask5', title: 'Development: Feature Implementation (Task Manager App)', time: '11:00 A.M. - 1:00 P.M.', project: 'Work', icon: 'code', iconColor: 'text-green-500', type: 'multi-step', progress: 0.6, steps: [
+        id: 'planTask5', title: 'Development: Feature Implementation (Task Manager App)', time: '11:00 A.M. - 1:00 P.M.', project: 'Work', categoryIcon: 'code', categoryIconColor: 'text-green-500', type: 'multi-step', progress: 0.6, steps: [
           { id: 'ppt5s1', title: 'Backend API for tasks', completed: true }, { id: 'ppt5s2', title: 'Frontend UI components', completed: true }, { id: 'ppt5s3', title: 'Integration and testing', completed: true }, { id: 'ppt5s4', title: 'Documentation', completed: false }, { id: 'ppt5s5', title: 'Deployment prep', completed: false }
         ]
       },
       // Daily Tasks & Other
       {
-        id: 'planTask6', title: 'Lunch Break', time: '1:00 P.M. - 1:45 P.M.', project: 'Personal', icon: 'restaurant', iconColor: 'text-orange-500', type: 'single-step'
+        id: 'planTask6', title: 'Lunch Break', time: '1:00 P.M. - 1:45 P.M.', project: 'Personal', categoryIcon: 'restaurant', categoryIconColor: 'text-orange-500', type: 'single-step'
       },
-      {
-        id: 'planTask7', title: 'Daily Task: Grocery Shopping', time: '2:00 P.M. - 3:00 P.M.', project: 'Home', icon: 'shopping_cart', iconColor: 'text-red-400', type: 'single-step'
+      { // Grocery Shopping - Cancelled
+        id: 'planTask7', title: 'Daily Task: Grocery Shopping', time: '2:00 P.M. - 3:00 P.M.', project: 'Home', categoryIcon: 'shopping_cart', categoryIconColor: 'text-red-400', type: 'single-step',
+        status: 'cancelled', notes: 'Cancelled for tomorrow.' // Original color is text-red-400
       },
       // Filmming
       {
-        id: 'planTask8', title: 'Filmming: Shoot Scene for Short Film', time: '3:30 P.M. - 5:30 P.M.', project: 'Creative', icon: 'videocam', iconColor: 'text-indigo-500', type: 'multi-step', progress: 0.33, steps: [
+        id: 'planTask8', title: 'Filmming: Shoot Scene for Short Film', time: '3:30 P.M. - 5:30 P.M.', project: 'Creative', categoryIcon: 'videocam', categoryIconColor: 'text-indigo-500', type: 'multi-step', progress: 0.33, steps: [
           { id: 'ppt8s1', title: 'Setup lighting & camera', completed: true }, { id: 'ppt8s2', title: 'Record Scene A takes', completed: false }, { id: 'ppt8s3', title: 'Record Scene B takes', completed: false }
         ]
       },
       // Daily Tasks
       {
-        id: 'planTask9', title: 'Daily Task: Clean Kitchen', time: '6:00 P.M. - 6:30 P.M.', project: 'Home', icon: 'cleaning_services', iconColor: 'text-lime-500', type: 'single-step'
+        id: 'planTask9', title: 'Daily Task: Clean Kitchen', time: '6:00 P.M. - 6:30 P.M.', project: 'Home', categoryIcon: 'cleaning_services', categoryIconColor: 'text-lime-500', type: 'single-step'
       },
       // YouTube & Entertainment
       {
-        id: 'planTask10', title: 'YouTube: Upload & Promote New Video', time: '7:00 P.M. - 8:00 P.M.', project: 'Content Creation', icon: 'video_library', iconColor: 'text-red-600', type: 'multi-step', progress: 0.5, steps: [
+        id: 'planTask10', title: 'YouTube: Upload & Promote New Video', time: '7:00 P.M. - 8:00 P.M.', project: 'Content Creation', categoryIcon: 'video_library', categoryIconColor: 'text-red-600', type: 'multi-step', progress: 0.5, steps: [
           { id: 'ppt10s1', title: 'Final video edit check', completed: true }, { id: 'ppt10s2', title: 'Upload to YouTube', completed: true }, { id: 'ppt10s3', title: 'Write description & tags', completed: false }, { id: 'ppt10s4', title: 'Share on social media', completed: false }
         ]
       },
       {
-        id: 'planTask11', title: 'Dinner', time: '8:00 P.M. - 8:45 P.M.', project: 'Personal', icon: 'dinner_dining', iconColor: 'text-orange-500', type: 'single-step'
+        id: 'planTask11', title: 'Dinner', time: '8:00 P.M. - 8:45 P.M.', project: 'Personal', categoryIcon: 'dinner_dining', categoryIconColor: 'text-orange-500', type: 'single-step'
       },
-      {
-        id: 'planTask12', title: 'Entertainment: Watch Movie', time: '9:00 P.M. - 10:30 P.M.', project: 'Personal', icon: 'movie', iconColor: 'text-yellow-500', type: 'single-step'
+      { // Movie Watching - Original entry, now rescheduled
+        id: 'planTask12', title: 'Entertainment: Watch Movie', time: '9:00 P.M. - 10:30 P.M.', project: 'Personal', categoryIcon: 'movie', categoryIconColor: 'text-red-500', type: 'single-step', // Original color (user specified red)
+        status: 'original-rescheduled-elsewhere'
       },
       // Other
       {
-        id: 'planTask13', title: 'Other: Plan Tomorrow\'s Schedule', time: '10:30 P.M. - 10:45 P.M.', project: 'Personal', icon: 'event_note', iconColor: 'text-gray-500', type: 'single-step'
+        id: 'planTask13', title: 'Other: Plan Tomorrow\'s Schedule', time: '10:30 P.M. - 10:45 P.M.', project: 'Personal', categoryIcon: 'event_note', categoryIconColor: 'text-gray-500', type: 'single-step'
       },
       {
-        id: 'planTask14', title: 'Entertainment: Social Media Catch-up', time: '10:45 P.M. - 11:15 P.M.', project: 'Personal', icon: 'public', iconColor: 'text-blue-400', type: 'single-step'
+        id: 'planTask14', title: 'Entertainment: Social Media Catch-up', time: '10:45 P.M. - 11:15 P.M.', project: 'Personal', categoryIcon: 'public', categoryIconColor: 'text-blue-400', type: 'single-step'
       },
       // Daily Routine
       {
-        id: 'planTask15', title: 'Bedtime Routine & Sleep', time: '11:30 P.M. - 11:59 P.M.', project: 'Personal', icon: 'hotel', iconColor: 'text-blue-600', type: 'single-step' // hotel for bed/sleep
+        id: 'planTask15', title: 'Bedtime Routine & Sleep', time: '11:30 P.M. - 11:59 P.M.', project: 'Personal', categoryIcon: 'hotel', categoryIconColor: 'text-blue-600', type: 'single-step'
       },
     ];
 
-    return tasks.map(task => {
+    return rawTasks.map(task => {
       const parts = task.title.split(': ');
-      if (parts.length > 1) {
-        // Check if the first part is a likely category (e.g., starts with uppercase, is a single word or few words)
-        // For simplicity, we'll assume any title with ": " is a category prefix.
-        // A more robust check might involve a list of known categories.
-        return { ...task, title: parts.slice(1).join(': ') }; // Join back in case title itself had colons
+      const displayTitle = parts.length > 1 ? parts.slice(1).join(': ') : task.title;
+
+      let determinedDisplayIcon = task.categoryIcon;
+      let determinedDisplayIconColor = task.categoryIconColor;
+      let determinedStatus = task.status || 'pending-tomorrow'; // Default to pending-tomorrow
+
+      switch (determinedStatus) {
+        case 'cancelled':
+        case 'original-rescheduled-elsewhere':
+          // Keep original category icon and color
+          determinedDisplayIcon = task.categoryIcon;
+          determinedDisplayIconColor = task.categoryIconColor;
+          break;
+        case 'completed': // This status would be set by user action, not here.
+          determinedDisplayIcon = 'check_circle';
+          determinedDisplayIconColor = 'text-green';
+          break;
+        case 'pending-tomorrow': // All other tasks for tomorrow get yellow icon
+        default:
+          determinedDisplayIcon = task.categoryIcon;
+          determinedDisplayIconColor = 'text-yellow'; // #FDFD96
+          // If status was undefined, ensure it's set
+          if (!task.status) determinedStatus = 'pending-tomorrow';
+          break;
       }
-      return task;
+
+      return {
+        ...task,
+        title: displayTitle,
+        displayIcon: determinedDisplayIcon,
+        displayIconColor: determinedDisplayIconColor,
+        status: determinedStatus // Ensure status is part of the returned object
+      };
     });
   }
 
