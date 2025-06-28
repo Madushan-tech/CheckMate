@@ -424,13 +424,29 @@ class CheckMateApp {
       this.highlightedTaskId = null;
     }
 
-    // Apply plan page logic globally for countdown
-    const planTasks = this.getPlanPageTasksSorted(); // Already sorted by time
+    // Determine if highlighting is allowed for the current view
+    let allowHighlighting = false;
+    if (this.currentPage === 'plan') {
+        const activeButton = document.querySelector('.date-filter .date-btn.active');
+        // Only allow highlighting if the 'Today' filter is active on the plan page
+        if (activeButton && activeButton.textContent.trim().toLowerCase() === 'today') {
+            allowHighlighting = true;
+        }
+    } else {
+        // For Home, Report, Profile pages, tasks are implicitly "Today's tasks"
+        allowHighlighting = true;
+    }
+
+    // Timer logic should always be based on TODAY's tasks.
+    const planTasksForTimer = this.getTasksForToday();
     const nowTime = new Date(); // Current time for comparison
 
-    let foundTask = null;
-    for (const task of planTasks) {
-      const { startDate, endDate } = this.parseTaskDateTime(task.time, today);
+    let foundTask = null; // This will be the task the timer focuses on (must be one of today's tasks)
+    activeTaskEndTime = null; // Reset activeTaskEndTime, will be set if a task is found
+
+    // Find the current task from TODAY'S tasks
+    for (const task of planTasksForTimer) {
+      const { startDate, endDate } = this.parseTaskDateTime(task.time, today); // 'today' is actual current day
       if (nowTime >= startDate && nowTime < endDate) {
         foundTask = task;
         activeTaskEndTime = endDate;
@@ -440,33 +456,37 @@ class CheckMateApp {
 
     if (foundTask) {
       activeTaskName = foundTask.title;
-      // Highlight the current task card
-      const currentTaskCard = document.querySelector(`.task-card[data-task-card-id="${foundTask.id}"]`);
-      if (currentTaskCard) {
-        currentTaskCard.classList.add('current-task-highlight');
-        this.highlightedTaskId = foundTask.id;
+      // Highlight the current task card ONLY if:
+      // 1. Highlighting is allowed for the current page/view (e.g., on 'Home' or 'Plan-Today')
+      // 2. The foundTask (which is one of today's tasks) is actually visible on the current page.
+      if (allowHighlighting) {
+        const currentTaskCard = document.querySelector(`.task-card[data-task-card-id="${foundTask.id}"]`);
+        if (currentTaskCard) { // Check if the card for this task is in the current DOM
+          currentTaskCard.classList.add('current-task-highlight');
+          this.highlightedTaskId = foundTask.id;
+        }
       }
     } else {
-      // If no current task from plan, check for the next upcoming task from the plan
+      // If no current task from TODAY'S tasks, check for the next upcoming task from TODAY'S tasks
       let nextTaskName = "No current tasks"; // Default if nothing is found
-      let nextTaskStartTime = null;
+      let nextTaskStartTime = null; // This will be a Date object
 
-      for (const task of planTasks) {
+      for (const task of planTasksForTimer) { // Iterate over today's tasks
         const { startDate } = this.parseTaskDateTime(task.time, today);
-        if (startDate > nowTime) { // Found the next task that hasn't started yet
-          if (!nextTaskStartTime || startDate < nextTaskStartTime) { // If it's earlier than previously found next task
+        if (startDate > nowTime) {
+          if (!nextTaskStartTime || startDate < nextTaskStartTime) {
             nextTaskStartTime = startDate;
-            // Displaying "Next: Task Name (starts in X)" might be too complex for direct countdown display.
-            // For now, let's keep it simple. If no *current* task, the countdown will show "No schedule".
-            // The task name will be "No current tasks".
+            // activeTaskName will be "No current tasks", and countdown will show "No schedule"
+            // or "Ended" if a previous task just finished.
+            // The primary goal is that activeTaskEndTime is based on today's schedule.
           }
         }
       }
-      activeTaskName = nextTaskName; // Display "No current tasks" or "Next: ..."
-      // activeTaskEndTime remains null, so "No schedule" will be shown by updateCountdown
+      activeTaskName = nextTaskName; // This will be "No current tasks" if nothing found
+      // activeTaskEndTime remains null if no current task, leading to "No schedule" in updateCountdown.
     }
 
-    taskNameElement.textContent = activeTaskName; // Display initial task name
+    // taskNameElement.textContent = activeTaskName; // This is handled by updateCountdown's first call
 
     const updateCountdown = () => {
       const now = new Date().getTime();
@@ -1023,36 +1043,64 @@ class CheckMateApp {
         notesSection.innerHTML = ''; // Clear notes for Today
         notesSection.style.display = 'none';
     } else if (selectedDateText === 'Tomorrow') {
-        tasks = this.getTasksForTomorrow();
-        const cancelledTasks = tasks.filter(task => task.status === 'cancelled');
-        if (cancelledTasks.length > 0) {
-            notesHTML = '<h3>Cancelled Tasks</h3><ul>';
-            cancelledTasks.forEach(task => {
-                notesHTML += `<li>${task.title} ${task.notes ? '- ' + task.notes : ''}</li>`;
-            });
-            notesHTML += '</ul>';
-            notesSection.innerHTML = notesHTML;
-            notesSection.style.display = 'block';
-        } else {
-            notesSection.innerHTML = '';
-            notesSection.style.display = 'none';
-        }
-    } else {
-        // Placeholder for other dates - for now, show no tasks and no notes
-        tasks = [];
+        const allTomorrowTasks = this.getTasksForTomorrow();
+        tasks = allTomorrowTasks; // Main list gets ALL tasks for tomorrow, including cancelled ones
+
+        // Clear and hide the notes section for the 'Tomorrow' view,
+        // as cancelled tasks will be styled in the main list and handled by the 'Note' filter.
         notesSection.innerHTML = '';
         notesSection.style.display = 'none';
-        console.log(`No task data defined for: ${selectedDateText}`);
+        tasksListContainer.style.display = ''; // Ensure main task list is visible
+
+    } else if (selectedDateText === 'Note') {
+        tasks = []; // No tasks for the main list when 'Note' filter is active
+        tasksListContainer.innerHTML = ''; // Clear main task list
+        tasksListContainer.style.display = 'none'; // Hide main task list
+
+        // Gather cancelled tasks from tomorrow's data for the "Note" section
+        // This could be expanded to include other notes or cancelled tasks from other days
+        const cancelledTomorrowTasks = this.getTasksForTomorrow().filter(task => task.status === 'cancelled');
+        // Potentially add cancelled tasks from today as well:
+        // const cancelledTodayTasks = this.getTasksForToday().filter(task => task.status === 'cancelled');
+        // const allCancelledTasksForNote = [...cancelledTodayTasks, ...cancelledTomorrowTasks];
+        // For now, sticking to tomorrow's cancelled tasks as per immediate example.
+
+        const notesToDisplay = cancelledTomorrowTasks; // Using tomorrow's cancelled for now
+
+        if (notesToDisplay.length > 0) {
+            const sortedNotes = [...notesToDisplay].sort((a, b) => {
+                const timeA = this.parseTime(a.time);
+                const timeB = this.parseTime(b.time);
+                // Note: if tasks from different days are mixed, sorting might need date context
+                return timeA.hour - timeB.hour || timeA.minute - timeB.minute;
+            });
+            notesSection.innerHTML = `<h3>Cancelled Tasks</h3>${this.generateTaskCards(sortedNotes)}`;
+            notesSection.style.display = 'block';
+        } else {
+            notesSection.innerHTML = '<p style="text-align: center; margin-top: 1rem;">No notes or cancelled tasks to display.</p>';
+            notesSection.style.display = 'block';
+        }
+    } else {
+        // Default case for any other filter buttons (e.g., specific dates not yet implemented)
+        tasks = [];
+        tasksListContainer.innerHTML = '<p style="text-align: center; margin-top: 1rem;">Tasks for this date are not available yet.</p>';
+        tasksListContainer.style.display = ''; // Show the message in the main list area
+        notesSection.innerHTML = '';
+        notesSection.style.display = 'none';
+        console.log(`No specific task data or note view defined for: ${selectedDateText}`);
     }
 
-    // Sort tasks before rendering (already sorted if coming from getTasksForCurrentPlanViewSorted, but good to ensure)
+    // Sort tasks for the main list (will be empty if 'Note' filter is active)
     tasks.sort((a, b) => {
       const timeA = this.parseTime(a.time);
       const timeB = this.parseTime(b.time);
       return timeA.hour - timeB.hour || timeA.minute - timeB.minute;
     });
 
-    tasksListContainer.innerHTML = this.generateTaskCards(tasks);
+    // Render tasks to the main list only if it's supposed to be visible
+    if (tasksListContainer.style.display !== 'none') {
+        tasksListContainer.innerHTML = this.generateTaskCards(tasks);
+    }
     this.initializeAndDisplayTaskCountdown(); // Refresh countdown based on new view
   }
 
@@ -1148,10 +1196,13 @@ class CheckMateApp {
   }
 
   generateTaskCards(tasks) {
-    return tasks.map(task => `
-      <div class="task-card fade-in" data-task-card-id="${task.id}"> <!-- Added data-task-card-id -->
+    return tasks.map(task => {
+      const cardClass = `task-card fade-in ${task.status === 'cancelled' ? 'task-cancelled' : ''}`;
+      const titleClass = `task-title ${task.status === 'cancelled' ? 'task-title-cancelled' : ''}`;
+      return `
+      <div class="${cardClass}" data-task-card-id="${task.id}">
         <div class="task-header">
-          <h3 class="task-title">${task.title}</h3>
+          <h3 class="${titleClass}">${task.title}</h3>
           <div class="task-icons">
             <!-- Primary Display Icon -->
             <span class="material-icons ${task.displayIconColor || task.categoryIconColor || 'text-gray'}">${task.displayIcon || task.categoryIcon || 'task_alt'}</span>
@@ -1177,8 +1228,8 @@ class CheckMateApp {
           </div>
           <a href="#" class="view-steps-link" data-task-id="${task.id}">View Steps</a>
         ` : ''}
-      </div>
-    `).join('');
+      </div>`; // Ensure semicolon is here if it was missing in a previous thought, though ASI should handle it. It is present in the read_files output.
+    }).join('');
   }
 
   getStepInfo(steps) {
@@ -1425,11 +1476,6 @@ class CheckMateApp {
   handleSearch(query) {
     console.log('Searching for:', query);
     // Implement search functionality
-  }
-
-  updateTasksForDate(date) {
-    console.log('Loading tasks for date:', date);
-    // Implement date-based task filtering
   }
 
   getCurrentDateTime() {
