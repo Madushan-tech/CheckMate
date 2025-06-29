@@ -98,57 +98,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Time Display ---
     function updateTime() {
-        // Only update time if the screen is conceptually "on".
-        // The actual visibility of time elements depends on whether lock screen or home screen is active.
-        if (!isScreenOn) {
-            // If screen is off, don't bother calculating time.
-            // Exception: if power button was just pressed to turn screen off,
-            // this function might be called once more before visual elements are hidden.
-            // This is generally fine.
-            return;
+        if (!isScreenOn && !(notificationPanel && notificationPanel.classList.contains('open'))) {
+            // If screen is off AND notification panel is not open, don't update time.
+            // (Time in panel header should update even if main screen is "off" by power button)
+            const isVisuallyOff = phoneScreen.style.backgroundColor === 'rgb(0, 0, 0)';
+            if(isVisuallyOff && !(notificationPanel && notificationPanel.classList.contains('open'))) return;
         }
 
         const now = new Date();
-        const targetTimezoneOffset = 5.5 * 60; // +5:30 in minutes
-        const localTimezoneOffset = now.getTimezoneOffset(); // User's local timezone offset in minutes
-        const totalOffset = targetTimezoneOffset + localTimezoneOffset;
+        let timeOptions = {
+            timeZone: 'Asia/Kolkata', // UTC+5:30
+            hour: 'numeric',
+            minute: '2-digit', // Ensure two digits for minute
+            hour12: true
+        };
 
-        const targetDate = new Date(now.getTime() + totalOffset * 60 * 1000);
+        // Get parts for reliable extraction
+        const timeFormatter = new Intl.DateTimeFormat(undefined, timeOptions); // Use default locale for AM/PM string
+        const timeParts = timeFormatter.formatToParts(now);
 
-        let hours = targetDate.getUTCHours();
-        const minutes = targetDate.getUTCMinutes().toString().padStart(2, '0');
-        const currentAmPm = targetDate.getUTCHours() >= 12 ? 'PM' : 'AM';
-        let currentHours = targetDate.getUTCHours() % 12;
-        currentHours = currentHours ? currentHours : 12; // the hour '0' should be '12'
+        let hoursStr = "0";
+        let minutesStr = "00";
+        let dayPeriodStr = "";
 
-        // Status bar time format (e.g., "4:14 PM")
-        const statusBarFormattedTime = `${currentHours}:${minutes} ${currentAmPm}`;
+        timeParts.forEach(part => {
+            switch (part.type) {
+                case 'hour': hoursStr = part.value; break;
+                case 'minute': minutesStr = part.value; break;
+                case 'dayPeriod': dayPeriodStr = part.value; break;
+            }
+        });
+
+        const statusBarFormattedTime = `${hoursStr}:${minutesStr} ${dayPeriodStr}`.trim();
         statusBarTimeElements.forEach(el => el.textContent = statusBarFormattedTime);
 
-        // Large lock screen time format (e.g., "4:14")
         if (lockScreenLargeTimeElement) {
-            lockScreenLargeTimeElement.textContent = `${currentHours}:${minutes}`;
+            lockScreenLargeTimeElement.textContent = `${hoursStr}:${minutesStr}`;
         }
         if (lockScreenAmPmElement) {
-            lockScreenAmPmElement.textContent = currentAmPm;
+            lockScreenAmPmElement.textContent = dayPeriodStr;
         }
 
-        // Date format (e.g., "Sat, Jun 28")
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const dayName = days[targetDate.getUTCDay()];
-        const monthName = months[targetDate.getUTCMonth()];
-        const dayOfMonth = targetDate.getUTCDate();
-        const formattedDate = `${dayName}, ${monthName} ${dayOfMonth}`;
+        let dateOptions = {
+            timeZone: 'Asia/Kolkata',
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+        };
+        const dateFormatter = new Intl.DateTimeFormat(undefined, dateOptions); // Default locale
+        const formattedDate = dateFormatter.format(now);
 
         if (lockScreenDateElement) {
             lockScreenDateElement.textContent = formattedDate;
         }
 
-        // Update time in notification panel header
         if (panelTimeDateElement && notificationPanel && notificationPanel.classList.contains('open')) {
-            // Format: 4:15 PM 06/28/2025 (from design)
-            const panelDateStr = `${(targetDate.getUTCMonth() + 1).toString().padStart(2, '0')}/${dayOfMonth.toString().padStart(2, '0')}/${targetDate.getUTCFullYear()}`;
+            const panelDateOptions = { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' };
+            // Using 'en-CA' for YYYY-MM-DD then reformatting to MM/DD/YYYY to avoid locale-specific date separators
+            const panelInternalDateFormatter = new Intl.DateTimeFormat('en-CA', panelDateOptions);
+            const dateParts = panelInternalDateFormatter.format(now).split('-'); // [YYYY, MM, DD]
+            const panelDateStr = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`; // MM/DD/YYYY
+
             panelTimeDateElement.textContent = `${statusBarFormattedTime} ${panelDateStr}`;
         }
     }
@@ -252,7 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dock = document.querySelector('.dock');
 
     const sampleAppsPage0 = [
-        { name: 'Messages', icon: '✉️' }, { name: 'Photos', icon: '🖼️' },
+        // Swapped: 'Messages' became 'Mail'
+        { name: 'Mail', icon: '📧' }, { name: 'Photos', icon: '🖼️' },
         { name: 'Camera', icon: '📷' }, { name: 'Maps', icon: '🗺️' },
         { name: 'Weather', icon: '☀️' }, { name: 'Clock', icon: '⏰' },
         { name: 'Notes', icon: '📝' }, { name: 'Reminders', icon: '🔔' }
@@ -262,7 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Settings', icon: '⚙️' }, { name: 'Calculator', icon: '🧮' }
     ];
     const dockApps = [
-        { name: 'Phone', icon: '📞' }, { name: 'Mail', icon: '📧' },
+        { name: 'Phone', icon: '📞' },
+        // Swapped: 'Mail' became 'Messages'
+        { name: 'Messages', icon: '✉️' },
         { name: 'Browser', icon: '🌐' }, { name: 'Music', icon: '🎵' }
     ];
 
@@ -449,7 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAllButton.addEventListener('click', () => {
             panelNotificationsList.innerHTML = ''; // Clear all notifications from the panel
             // Optionally, reset welcomeNotificationShown if you want it to reappear next time panel opens and list is empty
-            // welcomeNotificationShown = false;
+            welcomeNotificationShown = false; // Let welcome notification show again if panel reopens empty
+            closeNotificationPanel(); // Automatically close the panel
         });
     }
     // updateTime(); // Removed: Initial time update handled by power on

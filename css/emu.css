@@ -358,12 +358,12 @@ body {
 /* Specific styling for icons within the dock to match design */
 .dock .app .icon {
     background-color: white; /* From design's .dock-item */
-    width: 64px; /* From design's .dock-item */
-    height: 64px; /* From design's .dock-item */
+    width: 50px; /* Reduced size */
+    height: 50px; /* Reduced size */
     border-radius: 50%; /* Ensure circular */
     box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* From design's .dock-item */
     color: #333; /* Default icon color on white background */
-    font-size: 30px; /* Adjust icon size for larger dock items */
+    font-size: 24px; /* Reduced icon font size */
 }
 
 /* Ensure app name under dock icons is white and visible */
@@ -390,7 +390,7 @@ body {
     right: 0;
     z-index: 4;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Optional: subtle shadow for separation */
-    height: 110px; /* Approximate height: 64px icon + ~15px label + 16px pad-top + 16px pad-bottom */
+    height: 96px; /* Reduced height: 50px icon + ~15px label + 16px pad-top + 16px pad-bottom = ~97px, rounded to 96px */
     box-sizing: border-box;
 }
 
@@ -483,8 +483,8 @@ body {
     position: absolute; /* Needed for transform */
     width: calc(100% - 40px); /* Adjust for padding */
     /* Top elements: status bar (40px) + search bar (48px + 10+10 margins = 68px) = 108px */
-    /* Bottom elements: nav-buttons (50px) + dock (110px) + extra space (30px) = 190px */
-    height: calc(100% - 108px - 190px);
+    /* Bottom elements: nav-buttons (50px) + new dock (96px) + extra space (30px) = 176px */
+    height: calc(100% - 108px - 176px);
     left: 20px; /* Adjust for padding */
     top: 108px; /* Status bar height + search bar (with margins) */
     box-sizing: border-box; /* Ensure padding is included in height calculation */
