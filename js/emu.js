@@ -263,10 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sampleAppsPage0 = [
         // Swapped: 'Messages' became 'Mail'
-        { name: 'Mail', icon: '📧' }, { name: 'Photos', icon: '🖼️' },
-        { name: 'Camera', icon: '📷' }, { name: 'Maps', icon: '🗺️' },
-        { name: 'Weather', icon: '☀️' }, { name: 'Clock', icon: '⏰' },
-        { name: 'Notes', icon: '📝' }, { name: 'Reminders', icon: '🔔' }
+        { name: 'Mail', icon: '📧' },
+        { name: 'Photos', icon: '🖼️' },
+        { name: 'Camera', icon: '📷' },
+        { name: 'Maps', icon: '🗺️' },
+        { name: 'Weather', icon: '☀️' },
+        { name: 'CheckMate', iconPath: 'images/Checkmate_icon.png', action: 'navigate', url: 'index.html' },
+        { name: 'Clock', icon: '⏰' },
+        { name: 'Notes', icon: '📝' },
+        { name: 'Reminders', icon: '🔔' }
+        // Note: This makes the grid have 9 items, might wrap or need adjustment if grid is strictly 4x2 visually.
+        // For now, assuming the grid can handle more items and will scroll or wrap.
     ];
     const sampleAppsPage1 = [
         { name: 'Health', icon: '❤️' }, { name: 'Wallet', icon: '💰' },
@@ -282,7 +289,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function createAppElement(app) {
         const appEl = document.createElement('div');
         appEl.classList.add('app');
-        appEl.innerHTML = `<div class="icon">${app.icon}</div><span>${app.name}</span>`;
+
+        const iconDiv = document.createElement('div');
+        iconDiv.classList.add('icon');
+
+        if (app.iconPath) {
+            iconDiv.innerHTML = `<img src="${app.iconPath}" alt="${app.name} icon" class="app-icon-img-tag">`;
+        } else if (app.icon) { // Existing emoji/text icons
+            iconDiv.textContent = app.icon;
+        }
+        // Else: could have a default placeholder icon if neither is provided
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = app.name;
+
+        appEl.appendChild(iconDiv);
+        appEl.appendChild(nameSpan);
+
+        // Add click action if specified
+        if (app.action === 'navigate' && app.url) {
+            appEl.addEventListener('click', () => {
+                // Ensure this only happens if the home screen is active and not locked
+                if (homeScreen.classList.contains('active') && !isLocked) {
+                    window.location.href = app.url;
+                }
+            });
+            // Add a visual cue for clickable apps, e.g., cursor pointer
+            appEl.style.cursor = 'pointer';
+        }
+
         return appEl;
     }
 
@@ -461,9 +496,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearAllButton && panelNotificationsList) {
         clearAllButton.addEventListener('click', () => {
             panelNotificationsList.innerHTML = ''; // Clear all notifications from the panel
-            // Optionally, reset welcomeNotificationShown if you want it to reappear next time panel opens and list is empty
             welcomeNotificationShown = false; // Let welcome notification show again if panel reopens empty
-            closeNotificationPanel(); // Automatically close the panel
+
+            // Add a short delay before closing the panel
+            setTimeout(() => {
+                closeNotificationPanel(); // Automatically close the panel
+            }, 150); // 150ms delay
         });
     }
     // updateTime(); // Removed: Initial time update handled by power on

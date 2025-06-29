@@ -347,6 +347,13 @@ body {
     color: #fff; /* Default color for text/emoji icons */
 }
 
+.app .icon .app-icon-img-tag {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Or 'contain' if you prefer to see the whole image without cropping */
+    border-radius: inherit; /* Inherit circular shape from .icon parent */
+}
+
 .app .app-label { /* Explicit class for label if needed, but direct child span works too */
     margin-top: 4px; /* From design, though margin-bottom on icon provides spacing */
     /* font-size is inherited from .app */
