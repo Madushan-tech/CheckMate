@@ -1252,3 +1252,37 @@ body {
 .fab .material-icons {
   font-size: 28px;
 }
+
+/* Loading Screen Styles for index.html */
+#page-loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-bg); /* Use theme background */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it's on top */
+    color: var(--text-primary); /* Use theme text color */
+}
+
+#page-loading-screen img {
+    width: 100px; /* Adjust size as needed */
+    height: 100px; /* Adjust size as needed */
+    margin-bottom: 20px;
+}
+
+#page-loading-screen p {
+    font-size: 1.5em; /* Adjust size as needed */
+    font-weight: bold;
+    color: var(--text-primary); /* Ensure text color matches theme */
+}
+
+/*
+  The main container <div class="container"> in index.html has an inline style
+  style="display: none;" to hide it initially.
+  JavaScript will change this to display: flex (or block) when loading is complete.
+*/

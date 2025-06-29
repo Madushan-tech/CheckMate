@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
             homeScreen.classList.remove('active'); // Ensure home screen is not shown
 
             updateTime(); // Ensure time is current & visible
-            // Welcome notification is handled by opening the panel, not directly by power button.
         } else {
             // Screen is currently ON (either lock or home), so turn it OFF
             isScreenOn = false;
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (notificationPanel && notificationPanel.classList.contains('open')) {
                 closeNotificationPanel(); // Close panel if it's open when screen turns off
             }
-            // No need to update time if screen is turning off
         }
     });
 
@@ -268,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Camera', icon: '📷' },
         { name: 'Maps', icon: '🗺️' },
         { name: 'Weather', icon: '☀️' },
-        { name: 'CheckMate', iconPath: 'images/Checkmate_icon.png', action: 'navigate', url: 'index.html' },
+        { name: 'CheckMate', iconPath: 'images/CheckMate_icon.png' }, // action and url removed, iconPath updated
         { name: 'Clock', icon: '⏰' },
         { name: 'Notes', icon: '📝' },
         { name: 'Reminders', icon: '🔔' }
@@ -321,38 +319,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return appEl;
     }
 
+    // Populate apps once on DOM load, regardless of screen state
+    // Clear existing icons before populating to prevent duplicates
+    if(page0Grid) page0Grid.innerHTML = '';
+    if(page1Grid) page1Grid.innerHTML = '';
+    if(dock) dock.innerHTML = '';
+
     sampleAppsPage0.forEach(app => page0Grid.appendChild(createAppElement(app)));
     sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
     dockApps.forEach(app => dock.appendChild(createAppElement(app)));
 
     // Initial setup: Phone starts OFF
     function initializeEmulatorView() {
-        // Screen is initially off
         phoneScreen.style.backgroundColor = '#000';
         lockScreen.classList.add('hidden');
-        homeScreen.classList.remove('active'); // Ensure home is hidden
-
-        // Time will update once screen is turned on by power button
-        // No need to call updateTime() here if screen is off.
+        homeScreen.classList.remove('active');
     }
-
-    // Populate apps once on DOM load, regardless of screen state
-    // Clear existing icons before populating to prevent duplicates
-    // (e.g. if this script part was somehow re-evaluated or for hot-reloading scenarios)
-    if(page0Grid) page0Grid.innerHTML = '';
-    if(page1Grid) page1Grid.innerHTML = '';
-    if(dock) dock.innerHTML = '';
-
-    // Populate apps once on DOM load
-    sampleAppsPage0.forEach(app => page0Grid.appendChild(createAppElement(app)));
-    sampleAppsPage1.forEach(app => page1Grid.appendChild(createAppElement(app)));
-    dockApps.forEach(app => dock.appendChild(createAppElement(app)));
 
     initializeEmulatorView(); // Set initial visual state (screen off)
 
     // --- Navigation Button Event Listeners ---
     navHomeButton.addEventListener('click', () => {
         if (isScreenOn && !isLocked) {
+            // Close notification panel if open
+            if (notificationPanel && notificationPanel.classList.contains('open')) {
+                closeNotificationPanel();
+                // Ensure panel toggle icon resets if needed by closeNotificationPanel logic
+                if (panelToggleButton) panelToggleButton.textContent = 'keyboard_arrow_up';
+            }
             showPage(0); // Go to the first app page (home)
         }
     });

@@ -1655,3 +1655,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style);
 });
 
+window.addEventListener('load', () => {
+    const loadingScreen = document.getElementById('page-loading-screen');
+    const mainContainer = document.querySelector('.container');
+
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+    }
+    if (mainContainer) {
+        // The main container's initial display is 'flex' as per its role,
+        // so we restore it to that.
+        mainContainer.style.display = 'flex';
+    }
+});
